@@ -1,0 +1,2567 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <meta
+    name="description"
+    content="國宏蛋行提供新鮮雞蛋、米類、食用油、豆類、南北乾貨、調味料與日常雜貨。"
+  />
+
+  <title>國宏蛋行｜雞蛋・米類・食用油・南北乾貨</title>
+
+  <style>
+    :root {
+      --primary: #3f3428;
+      --primary-dark: #281f18;
+      --secondary: #b8844f;
+      --secondary-dark: #95683d;
+      --cream: #f3e8d3;
+      --cream-light: #fbf7ef;
+      --background: #f8f4ec;
+      --card: #ffffff;
+      --text: #342e27;
+      --muted: #766d63;
+      --border: #e6ddd0;
+      --danger: #a84f3d;
+      --success: #627548;
+      --shadow: 0 12px 35px rgba(60, 49, 37, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 90px;
+    }
+
+    body {
+      font-family:
+        "Noto Sans TC",
+        "Microsoft JhengHei",
+        Arial,
+        sans-serif;
+      background: var(--background);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    /* =========================
+       導覽列
+    ========================= */
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(251, 247, 239, 0.96);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+
+    .navbar {
+      min-height: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .logo-link {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      flex-shrink: 0;
+    }
+
+    .header-logo {
+      width: 58px;
+      height: 58px;
+      object-fit: contain;
+      border-radius: 50%;
+      background: var(--cream);
+    }
+
+    .brand-text strong {
+      display: block;
+      color: var(--primary-dark);
+      font-size: 22px;
+      line-height: 1.25;
+      letter-spacing: 3px;
+    }
+
+    .brand-text span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 1.5px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      position: relative;
+      padding: 8px 0;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .nav-links a::after {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      background: var(--secondary);
+      content: "";
+      transform: scaleX(0);
+      transition: transform 0.2s ease;
+    }
+
+    .nav-links a:hover::after {
+      transform: scaleX(1);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .admin-button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 999px;
+      background: var(--primary);
+      color: white;
+      font-weight: 800;
+      transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+    }
+
+    .admin-button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .menu-button {
+      display: none;
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: white;
+      color: var(--primary);
+      font-size: 22px;
+    }
+
+    /* =========================
+       首頁主視覺
+    ========================= */
+
+    .hero {
+      position: relative;
+      min-height: 620px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      background:
+        linear-gradient(
+          90deg,
+          rgba(40, 31, 24, 0.93) 0%,
+          rgba(62, 48, 36, 0.8) 50%,
+          rgba(62, 48, 36, 0.28) 100%
+        ),
+        url("https://images.unsplash.com/photo-1506976785307-8732e854ad03?auto=format&fit=crop&w=1800&q=85")
+        center / cover;
+    }
+
+    .hero::after {
+      position: absolute;
+      inset: auto -80px -130px auto;
+      width: 380px;
+      height: 380px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+      content: "";
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 720px;
+      padding: 95px 0;
+      color: white;
+    }
+
+    .hero-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+      padding: 9px 16px 9px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .hero-brand img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: contain;
+      background: var(--cream);
+    }
+
+    .hero-brand span {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    .hero h1 {
+      margin-bottom: 24px;
+      font-size: clamp(44px, 6vw, 74px);
+      line-height: 1.15;
+      letter-spacing: 5px;
+    }
+
+    .hero h1 span {
+      color: #e8c994;
+    }
+
+    .hero-description {
+      max-width: 620px;
+      margin-bottom: 34px;
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 18px;
+    }
+
+    .hero-categories {
+      margin-bottom: 34px;
+      color: #f1d8ad;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .button {
+      min-height: 52px;
+      padding: 0 25px;
+      border: none;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+    }
+
+    .button-primary {
+      background: var(--secondary);
+      color: white;
+    }
+
+    .button-primary:hover {
+      background: var(--secondary-dark);
+    }
+
+    .button-outline {
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+    }
+
+    .button-outline:hover {
+      background: rgba(255, 255, 255, 0.17);
+    }
+
+    .hero-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 28px;
+      margin-top: 48px;
+    }
+
+    .hero-feature {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .hero-feature-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.13);
+    }
+
+    /* =========================
+       共用區塊
+    ========================= */
+
+    .section {
+      padding: 90px 0;
+    }
+
+    .section-white {
+      background: white;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 30px;
+      margin-bottom: 38px;
+    }
+
+    .section-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--secondary);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 3px;
+    }
+
+    .section-heading h2,
+    .about-content h2,
+    .contact-title {
+      font-size: clamp(30px, 4vw, 45px);
+      line-height: 1.3;
+      letter-spacing: 2px;
+    }
+
+    .section-heading p {
+      max-width: 570px;
+      color: var(--muted);
+    }
+
+    /* =========================
+       商品搜尋
+    ========================= */
+
+    .search-panel {
+      position: relative;
+      z-index: 4;
+      margin-top: -42px;
+    }
+
+    .search-box {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: white;
+      box-shadow: var(--shadow);
+    }
+
+    .search-input-wrapper {
+      min-height: 54px;
+      padding: 0 18px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--cream-light);
+    }
+
+    .search-input-wrapper span {
+      font-size: 20px;
+    }
+
+    .search-input {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+    }
+
+    .search-button {
+      min-width: 140px;
+      border: none;
+      border-radius: 12px;
+      background: var(--primary);
+      color: white;
+      font-weight: 800;
+    }
+
+    .search-button:hover {
+      background: var(--primary-dark);
+    }
+
+    /* =========================
+       商品分類及列表
+    ========================= */
+
+    .products-layout {
+      display: grid;
+      grid-template-columns: 230px minmax(0, 1fr);
+      align-items: start;
+      gap: 28px;
+    }
+
+    .category-sidebar {
+      position: sticky;
+      top: 105px;
+    }
+
+    .category-toggle-button {
+      width: 100%;
+      min-height: 56px;
+      padding: 0 18px;
+      border: none;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: var(--primary);
+      color: white;
+      font-weight: 900;
+      font-size: 16px;
+      box-shadow: 0 8px 22px rgba(63, 52, 40, 0.16);
+    }
+
+    .category-toggle-button:hover {
+      background: var(--primary-dark);
+    }
+
+    .category-toggle-icon {
+      display: inline-block;
+      transition: transform 0.25s ease;
+    }
+
+    .category-toggle-button.open .category-toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    .sidebar-category-list {
+      max-height: 0;
+      margin-top: 0;
+      overflow: hidden;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      background: white;
+      opacity: 0;
+      transform: translateY(-8px);
+      transition:
+        max-height 0.35s ease,
+        margin-top 0.3s ease,
+        opacity 0.25s ease,
+        transform 0.3s ease,
+        border-color 0.3s ease;
+    }
+
+    .sidebar-category-list.show {
+      max-height: 620px;
+      margin-top: 12px;
+      border-color: var(--border);
+      opacity: 1;
+      transform: translateY(0);
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar-category-button {
+      width: 100%;
+      min-height: 52px;
+      padding: 12px 15px;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: white;
+      color: var(--text);
+      text-align: left;
+      font-weight: 750;
+      transition:
+        background 0.2s ease,
+        color 0.2s ease;
+    }
+
+    .sidebar-category-button:last-child {
+      border-bottom: none;
+    }
+
+    .sidebar-category-button:hover {
+      background: #f6f0e6;
+      color: var(--secondary-dark);
+    }
+
+    .sidebar-category-button.active {
+      background: var(--cream);
+      color: var(--primary-dark);
+    }
+
+    .sidebar-category-name {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-category-icon {
+      width: 28px;
+      text-align: center;
+      font-size: 19px;
+    }
+
+    .sidebar-category-count {
+      min-width: 28px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #f0ebe3;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .sidebar-category-button.active .sidebar-category-count {
+      background: var(--primary);
+      color: white;
+    }
+
+    .selected-category-banner {
+      min-height: 56px;
+      margin-bottom: 22px;
+      padding: 12px 18px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      background: var(--cream-light);
+    }
+
+    .selected-category-banner strong {
+      color: var(--primary);
+    }
+
+    .clear-filter-button {
+      padding: 7px 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: white;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .clear-filter-button:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 23px;
+    }
+
+    .product-card {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 19px;
+      background: var(--card);
+      box-shadow: 0 5px 18px rgba(65, 52, 39, 0.05);
+      transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow);
+    }
+
+    .product-image-wrapper {
+      position: relative;
+      height: 225px;
+      overflow: hidden;
+      background: #ede6db;
+    }
+
+    .product-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .product-card:hover .product-image {
+      transform: scale(1.05);
+    }
+
+    .stock-badge {
+      position: absolute;
+      top: 13px;
+      left: 13px;
+      padding: 6px 11px;
+      border-radius: 999px;
+      background: rgba(98, 117, 72, 0.94);
+      color: white;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .stock-badge.out {
+      background: rgba(104, 96, 88, 0.92);
+    }
+
+    .product-content {
+      padding: 19px;
+    }
+
+    .product-category {
+      margin-bottom: 5px;
+      color: var(--secondary-dark);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .product-name {
+      margin-bottom: 8px;
+      font-size: 20px;
+      line-height: 1.4;
+    }
+
+    .product-description {
+      min-height: 48px;
+      margin-bottom: 17px;
+      display: -webkit-box;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 14px;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+
+    .product-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .product-price {
+      color: var(--danger);
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .product-price small {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .detail-button {
+      padding: 9px 13px;
+      border: 1px solid var(--primary);
+      border-radius: 10px;
+      background: transparent;
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .detail-button:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .loading,
+    .empty-message {
+      grid-column: 1 / -1;
+      padding: 65px 20px;
+      border: 1px dashed var(--border);
+      border-radius: 18px;
+      background: white;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .empty-message h3 {
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    /* =========================
+       關於我們
+    ========================= */
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      align-items: center;
+      gap: 70px;
+    }
+
+    .about-image-wrapper {
+      position: relative;
+    }
+
+    .about-image {
+      width: 100%;
+      min-height: 520px;
+      border-radius: 25px;
+      object-fit: cover;
+      box-shadow: var(--shadow);
+    }
+
+    .about-logo-card {
+      position: absolute;
+      right: -25px;
+      bottom: 30px;
+      width: 160px;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: white;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .about-logo-card img {
+      width: 95px;
+      height: 95px;
+      margin: 0 auto 8px;
+      border-radius: 50%;
+      object-fit: contain;
+      background: var(--cream);
+    }
+
+    .about-logo-card strong {
+      display: block;
+      letter-spacing: 2px;
+    }
+
+    .about-content h2 {
+      margin-bottom: 22px;
+    }
+
+    .about-content > p {
+      margin-bottom: 17px;
+      color: var(--muted);
+    }
+
+    .about-points {
+      display: grid;
+      gap: 14px;
+      margin-top: 27px;
+    }
+
+    .about-point {
+      padding: 15px 17px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      display: flex;
+      align-items: flex-start;
+      gap: 13px;
+      background: var(--cream-light);
+    }
+
+    .about-check {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--primary);
+      color: white;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .about-point p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* =========================
+       聯絡資訊
+    ========================= */
+
+    .contact-section {
+      background:
+        linear-gradient(
+          135deg,
+          #342920,
+          #49392b
+        );
+      color: white;
+    }
+
+    .contact-section .section-label {
+      color: #e6c79b;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 50px;
+    }
+
+    .contact-description {
+      max-width: 620px;
+      margin: 18px 0 34px;
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    .contact-list {
+      display: grid;
+      gap: 17px;
+    }
+
+    .contact-item {
+      padding: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .contact-icon {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.1);
+      font-size: 20px;
+    }
+
+    .contact-item span {
+      display: block;
+      color: rgba(255, 255, 255, 0.62);
+      font-size: 13px;
+    }
+
+    .contact-item strong {
+      display: block;
+      color: white;
+      font-size: 17px;
+    }
+
+    .contact-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    .contact-button {
+      min-height: 48px;
+      padding: 0 19px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 11px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      font-weight: 800;
+    }
+
+    .contact-button:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .business-hours {
+      padding: 31px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 21px;
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .business-hours h3 {
+      margin-bottom: 22px;
+      font-size: 24px;
+    }
+
+    .hours-row {
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.11);
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .hours-row:last-child {
+      border-bottom: none;
+    }
+
+    .hours-row span {
+      color: rgba(255, 255, 255, 0.65);
+    }
+
+    .business-note {
+      margin-top: 20px;
+      padding: 13px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.07);
+      color: rgba(255, 255, 255, 0.68);
+      font-size: 13px;
+    }
+
+    /* =========================
+       頁尾
+    ========================= */
+
+    .footer {
+      padding: 28px 0;
+      background: #211a14;
+      color: rgba(255, 255, 255, 0.6);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    /* =========================
+       商品詳細視窗
+    ========================= */
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(25, 20, 16, 0.72);
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .product-modal {
+      position: relative;
+      width: min(850px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 23px;
+      background: white;
+      box-shadow: 0 30px 85px rgba(0, 0, 0, 0.32);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      z-index: 3;
+      width: 42px;
+      height: 42px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.94);
+      color: var(--primary);
+      font-size: 25px;
+      box-shadow: 0 5px 17px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .modal-image {
+      width: 100%;
+      height: 100%;
+      min-height: 490px;
+      object-fit: cover;
+      background: #eee8df;
+    }
+
+    .modal-content {
+      padding: 58px 38px 38px;
+    }
+
+    .modal-category {
+      margin-bottom: 7px;
+      color: var(--secondary-dark);
+      font-weight: 900;
+    }
+
+    .modal-title {
+      margin-bottom: 15px;
+      font-size: 32px;
+      line-height: 1.3;
+    }
+
+    .modal-description {
+      margin-bottom: 24px;
+      color: var(--muted);
+    }
+
+    .modal-info {
+      display: grid;
+      gap: 11px;
+      margin-bottom: 24px;
+    }
+
+    .modal-info-row {
+      padding-bottom: 11px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .modal-info-row span {
+      color: var(--muted);
+    }
+
+    .modal-price {
+      margin-bottom: 22px;
+      color: var(--danger);
+      font-size: 28px;
+      font-weight: 900;
+    }
+
+    .modal-contact-button {
+      width: 100%;
+      min-height: 51px;
+      border: none;
+      border-radius: 11px;
+      background: var(--primary);
+      color: white;
+      font-weight: 900;
+    }
+
+    .modal-contact-button:hover {
+      background: var(--primary-dark);
+    }
+
+    /* =========================
+       響應式設計
+    ========================= */
+
+    @media (max-width: 1050px) {
+      .nav-links {
+        position: absolute;
+        top: 82px;
+        right: 0;
+        left: 0;
+        display: none;
+        padding: 18px 25px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        background: white;
+        border-bottom: 1px solid var(--border);
+        box-shadow: var(--shadow);
+      }
+
+      .nav-links.show {
+        display: flex;
+      }
+
+      .nav-links a {
+        display: block;
+        padding: 12px 5px;
+      }
+
+      .menu-button {
+        display: block;
+      }
+
+      .admin-button {
+        display: none;
+      }
+
+      .product-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 800px) {
+      .section {
+        padding: 70px 0;
+      }
+
+      .hero {
+        min-height: 590px;
+        background:
+          linear-gradient(
+            rgba(47, 37, 28, 0.82),
+            rgba(47, 37, 28, 0.9)
+          ),
+          url("https://images.unsplash.com/photo-1506976785307-8732e854ad03?auto=format&fit=crop&w=1200&q=85")
+          center / cover;
+      }
+
+      .hero-content {
+        text-align: center;
+      }
+
+      .hero-brand {
+        justify-content: center;
+      }
+
+      .hero-description {
+        margin-right: auto;
+        margin-left: auto;
+      }
+
+      .hero-buttons,
+      .hero-features {
+        justify-content: center;
+      }
+
+      .section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .products-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .category-sidebar {
+        position: static;
+      }
+
+      .about-grid,
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .about-image {
+        min-height: 420px;
+      }
+
+      .about-logo-card {
+        right: 20px;
+      }
+
+      .modal-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-image {
+        min-height: 300px;
+        max-height: 340px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: min(100% - 28px, 1180px);
+      }
+
+      .navbar {
+        min-height: 70px;
+      }
+
+      .header-logo {
+        width: 47px;
+        height: 47px;
+      }
+
+      .brand-text strong {
+        font-size: 18px;
+      }
+
+      .brand-text span {
+        display: none;
+      }
+
+      .nav-links {
+        top: 70px;
+      }
+
+      .hero {
+        min-height: 650px;
+      }
+
+      .hero-content {
+        padding: 75px 0;
+      }
+
+      .hero h1 {
+        font-size: 42px;
+        letter-spacing: 3px;
+      }
+
+      .hero-description {
+        font-size: 16px;
+      }
+
+      .hero-buttons {
+        flex-direction: column;
+      }
+
+      .button {
+        width: 100%;
+      }
+
+      .hero-features {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 13px;
+      }
+
+      .search-box {
+        grid-template-columns: 1fr;
+      }
+
+      .search-button {
+        min-height: 50px;
+      }
+
+      .selected-category-banner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .product-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .product-image-wrapper {
+        height: 260px;
+      }
+
+      .about-image {
+        min-height: 350px;
+      }
+
+      .about-logo-card {
+        display: none;
+      }
+
+      .hours-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .contact-actions {
+        flex-direction: column;
+      }
+
+      .contact-button {
+        width: 100%;
+      }
+
+      .modal-content {
+        padding: 48px 23px 27px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 導覽列 -->
+  <header class="header">
+    <div class="container navbar">
+      <a href="#home" class="logo-link">
+        <img
+          src="images/logo.png"
+          alt="國宏蛋行 Logo"
+          class="header-logo"
+          onerror="this.style.display='none'"
+        />
+
+        <div class="brand-text">
+          <strong>國宏蛋行</strong>
+          <span>GUO HONG EGG STORE</span>
+        </div>
+      </a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home">首頁</a></li>
+        <li><a href="#products">商品總覽</a></li>
+        <li><a href="#about">關於我們</a></li>
+        <li><a href="#contact">聯絡我們</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button
+          type="button"
+          class="admin-button"
+          onclick="goToAdmin()"
+        >
+          管理員登入
+        </button>
+
+        <button
+          type="button"
+          class="menu-button"
+          id="menuButton"
+          aria-label="開啟導覽選單"
+        >
+          ☰
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- 首頁主視覺 -->
+    <section class="hero" id="home">
+      <div class="container">
+        <div class="hero-content">
+          <div class="hero-brand">
+            <img
+              src="images/logo.png"
+              alt="國宏蛋行"
+              onerror="this.style.display='none'"
+            />
+
+            <span>在地食材・用心服務</span>
+          </div>
+
+          <h1>
+            國宏蛋行<br />
+          </h1>
+
+          <div class="hero-categories">
+            雞蛋・米類・食用油・豆類・南北乾貨・日常雜貨
+          </div>
+
+          <p class="hero-description">
+            提供家庭及餐飲業所需的新鮮雞蛋、各式米類、食用油、
+            豆類、南北乾貨、調味用品與日常食品，商品多樣，
+            歡迎來店選購或來電洽詢。
+          </p>
+
+          <div class="hero-buttons">
+            <a
+              href="#products"
+              class="button button-primary"
+            >
+              查看全部商品
+            </a>
+
+            <a
+              href="#contact"
+              class="button button-outline"
+            >
+              聯絡店家
+            </a>
+          </div>
+
+          <div class="hero-features">
+            <div class="hero-feature">
+              <div class="hero-feature-icon">🥚</div>
+              <span>新鮮雞蛋</span>
+            </div>
+
+            <div class="hero-feature">
+              <div class="hero-feature-icon">🌾</div>
+              <span>多樣食品</span>
+            </div>
+
+            <div class="hero-feature">
+              <div class="hero-feature-icon">🤝</div>
+              <span>零售與批發</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 搜尋欄 -->
+    <div class="container search-panel">
+      <div class="search-box">
+        <div class="search-input-wrapper">
+          <span>🔍</span>
+
+          <input
+            type="search"
+            id="searchInput"
+            class="search-input"
+            placeholder="搜尋商品，例如：雞蛋、白米、沙拉油"
+            autocomplete="off"
+          />
+        </div>
+
+        <button
+          type="button"
+          class="search-button"
+          id="searchButton"
+        >
+          搜尋商品
+        </button>
+      </div>
+    </div>
+
+    <!-- 商品總覽 -->
+    <section class="section" id="products">
+      <div class="container">
+        <div class="section-heading">
+          <div>
+            <span class="section-label">OUR PRODUCTS</span>
+            <h2>商品總覽</h2>
+          </div>
+
+          <p id="productCountText">
+            點擊左側商品分類即可篩選商品，也可以使用搜尋功能快速查找。
+          </p>
+        </div>
+
+        <div class="products-layout">
+          <!-- 左側分類 -->
+          <aside class="category-sidebar">
+            <button
+              type="button"
+              class="category-toggle-button"
+              id="categoryToggleButton"
+              aria-expanded="false"
+            >
+              <span>☰ 商品分類</span>
+
+              <span
+                class="category-toggle-icon"
+                id="categoryToggleIcon"
+              >
+                ▼
+              </span>
+            </button>
+
+            <div
+              class="sidebar-category-list"
+              id="sidebarCategoryList"
+            >
+              <!-- JavaScript 產生分類 -->
+            </div>
+          </aside>
+
+          <!-- 右側商品 -->
+          <div class="products-main">
+            <div
+              class="selected-category-banner"
+              id="selectedCategoryBanner"
+            >
+              <div>
+                目前分類：
+                <strong id="selectedCategoryText">
+                  全部商品
+                </strong>
+              </div>
+
+              <button
+                type="button"
+                class="clear-filter-button"
+                id="clearFilterButton"
+              >
+                顯示全部
+              </button>
+            </div>
+
+            <div class="product-grid" id="productGrid">
+              <div class="loading">商品載入中……</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 關於我們 -->
+    <section class="section section-white" id="about">
+      <div class="container about-grid">
+        <div class="about-image-wrapper">
+          <img
+            class="about-image"
+            src="https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=1000&q=85"
+            alt="新鮮雞蛋"
+          />
+
+          <div class="about-logo-card">
+            <img
+              src="images/logo.png"
+              alt="國宏蛋行 Logo"
+              onerror="this.style.display='none'"
+            />
+
+            <strong>國宏蛋行</strong>
+          </div>
+        </div>
+
+        <div class="about-content">
+          <span class="section-label">ABOUT OUR STORE</span>
+
+          <h2>不只是蛋行，也是您的日常食品行</h2>
+
+          <p>
+            國宏蛋行除了提供新鮮雞蛋，也販售米類、食用油、豆類、
+            麵類、南北乾貨、調味用品及各式日常食品，方便顧客一次購足。
+          </p>
+
+          <p>
+            我們服務一般家庭、餐飲店家與公司行號，無論是少量零售或大量採購，
+            都歡迎來店或來電詢問商品規格、價格與供貨方式。
+          </p>
+
+          <div class="about-points">
+            <div class="about-point">
+              <div class="about-check">✓</div>
+
+              <div>
+                <strong>商品種類多樣</strong>
+                <p>
+                  從雞蛋、米、油到乾貨與雜物，一次選購日常所需。
+                </p>
+              </div>
+            </div>
+
+            <div class="about-point">
+              <div class="about-check">✓</div>
+
+              <div>
+                <strong>零售與大量採購</strong>
+                <p>
+                  家庭購買、餐廳叫貨及公司採購都可以來電洽詢。
+                </p>
+              </div>
+            </div>
+
+            <div class="about-point">
+              <div class="about-check">✓</div>
+
+              <div>
+                <strong>親切在地服務</strong>
+                <p>
+                  提供合適的商品建議，實際價格以店內及當期行情為準。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 聯絡資訊 -->
+    <section class="section contact-section" id="contact">
+      <div class="container contact-grid">
+        <div>
+          <span class="section-label">CONTACT US</span>
+
+          <h2 class="contact-title">歡迎來店選購</h2>
+
+          <p class="contact-description">
+            商品價格可能依品牌、規格、重量及市場行情調整。
+            如需詢問商品、庫存或大量訂購，歡迎直接聯絡國宏蛋行。
+          </p>
+
+          <div class="contact-list">
+            <div class="contact-item">
+              <div class="contact-icon">📍</div>
+
+              <div>
+                <span>店家地址</span>
+                <strong>106臺北市大安區黎元里安居街117號</strong>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon">☎</div>
+
+              <div>
+                <span>聯絡電話</span>
+                <strong>02-2377-8935</strong>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon">💬</div>
+
+              <div>
+                <span>LINE 或其他聯絡方式</span>
+                <strong>請修改成店家的聯絡帳號</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-actions">
+            <a
+              href="tel:031234567"
+              class="contact-button"
+            >
+              ☎ 立即撥打
+            </a>
+
+            <a
+              href="#"
+              class="contact-button"
+              onclick="showMapMessage(event)"
+            >
+              📍 Google 地圖導航
+            </a>
+          </div>
+        </div>
+
+        <div class="business-hours">
+          <h3>營業時間</h3>
+
+          <div class="hours-row">
+            <span>星期一至星期五</span>
+            <strong>09:00－19:00</strong>
+          </div>
+
+          <div class="hours-row">
+            <span>星期六</span>
+            <strong>09:00－19:00</strong>
+          </div>
+
+          <div class="hours-row">
+            <span>星期日</span>
+            <strong>請依店家公告</strong>
+          </div>
+
+          <div class="hours-row">
+            <span>國定假日</span>
+            <strong>請依店家公告</strong>
+          </div>
+
+          <p class="business-note">
+            目前營業時間為展示內容，請記得修改成店家的實際時間。
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 頁尾 -->
+  <footer class="footer">
+    <div class="container">
+      © <span id="currentYear"></span>
+      國宏蛋行 All Rights Reserved.
+    </div>
+  </footer>
+
+  <!-- 商品詳細視窗 -->
+  <div
+    class="modal-overlay"
+    id="productModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modalTitle"
+  >
+    <div class="product-modal">
+      <button
+        type="button"
+        class="modal-close"
+        id="modalCloseButton"
+        aria-label="關閉商品視窗"
+      >
+        ×
+      </button>
+
+      <div class="modal-grid">
+        <img
+          class="modal-image"
+          id="modalImage"
+          src=""
+          alt=""
+        />
+
+        <div class="modal-content">
+          <div
+            class="modal-category"
+            id="modalCategory"
+          ></div>
+
+          <h2
+            class="modal-title"
+            id="modalTitle"
+          ></h2>
+
+          <p
+            class="modal-description"
+            id="modalDescription"
+          ></p>
+
+          <div class="modal-info">
+            <div class="modal-info-row">
+              <span>販售單位</span>
+              <strong id="modalUnit"></strong>
+            </div>
+
+            <div class="modal-info-row">
+              <span>商品狀態</span>
+              <strong id="modalStock"></strong>
+            </div>
+          </div>
+
+          <div
+            class="modal-price"
+            id="modalPrice"
+          ></div>
+
+          <button
+            type="button"
+            class="modal-contact-button"
+            onclick="scrollToContact()"
+          >
+            聯絡店家詢問
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /*
+     * ============================================================
+     * 後端 API 網址
+     * ============================================================
+     *
+     * 後續建立 Node.js 後端後，程式會讀取：
+     *
+     * GET /api/products
+     *
+     * 目前尚未建立後端時，會自動使用下方範例商品。
+     */
+
+    const API_BASE_URL = "";
+
+    /*
+     * ============================================================
+     * 範例商品資料
+     * ============================================================
+     */
+
+    const sampleProducts = [
+      {
+        id: 1,
+        name: "新鮮洗選雞蛋",
+        category: "雞蛋",
+        description:
+          "新鮮雞蛋，適合家庭料理、早餐店及餐飲業使用。",
+        price: 120,
+        unit: "每盒",
+        stock: 30,
+        is_available: true,
+        image_url:
+          "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=900&q=85"
+      },
+      {
+        id: 2,
+        name: "土雞蛋",
+        category: "雞蛋",
+        description:
+          "蛋黃飽滿、風味濃郁，實際規格與價格請洽店家。",
+        price: 160,
+        unit: "每盒",
+        stock: 18,
+        is_available: true,
+        image_url:
+          "https://images.unsplash.com/photo-1569288052389-dac9b01c9c05?auto=format&fit=crop&w=900&q=85"
+      },
+      {
+        id: 3,
+        name: "台灣白米",
+        category: "米類",
+        description:
+          "適合日常家庭食用，口感香甜，實際品牌依店內供應為準。",
+        price: 720,
+        unit: "每包",
+        stock: 15,
+        is_available: true,
+        image_url:
+          "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=900&q=85"
+      },
+      {
+        id: 4,
+        name: "台灣糙米",
+        category: "米類",
+        description:
+          "保留米糠與胚芽，適合搭配白米一起烹煮。",
+        price: 150,
+        unit: "每公斤",
+        stock: 20,
+        is_available: true,
+        image_url:
+          "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?auto=format&fit=crop&w=900&q=85"
+      },
+      {
+        id: 5,
+        name: "家庭號沙拉油",
+        category: "食用油",
+        description:
+          "適合煎、炒及一般家庭料理，品牌與容量依現場供應。",
+        price: 280,
+        unit: "每桶",
+        stock: 12,
+        is_available: true,
+        image_url:
+          "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=900&q=85"
+      },
+      {
+        id: 6,
+        name: "純正麻油",
+        category: "食用油",
+        description:
+          "香氣濃郁，適合麻油雞、拌麵及各式料理。",
+        price: 260,
+        unit: "每瓶",
+        stock: 10,
+        is_available: true,
+        image_url:
+          "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=900&q=85"
+      },
+      {
+        id: 7,
+        name: "萬丹紅豆",
+        category: "豆類",
+        description:
+          "顆粒飽滿，適合紅豆湯、甜品及製作紅豆餡。",
+        price: 95,
+        unit: "每台斤",
+        stock: 22,
+        is_available: true,
+        image_url:
+          "https://images.unsplash.com/photo-1612257999756-45d44e1c0cb4?auto=format&fit=crop&w=900&q=85"
+      },
+      {
+        id: 8,
+        name: "綠豆",
+        category: "豆類",
+        description:
+          "適合煮綠豆湯、綠豆沙及各式傳統甜品。",
+        price: 75,
+        unit: "每台斤",
+        stock: 26,
+        is_available: true,
+        image_url:
+          "https://images.unsplash.com/photo-1515543904379-3d757afe72e4?auto=format&fit=crop&w=900&q=85"
+      },
+      {
+        id: 9,
+        name: "關廟麵",
+        category: "麵類",
+        description:
+          "方便保存與料理，可搭配湯麵、乾麵及家常料理。",
+        price: 110,
+        unit: "每包",
+        stock: 16,
+        is_available: true,
+        image_url:
+          "https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&w=900&q=85"
+      },
+      {
+        id: 10,
+        name: "乾香菇",
+        category: "南北乾貨",
+        description:
+          "香氣濃郁，適合煮湯、滷製及各式家常料理。",
+        price: 280,
+        unit: "每包",
+        stock: 8,
+        is_available: true,
+        image_url:
+          "https://images.unsplash.com/photo-1504545102780-26774c1bb073?auto=format&fit=crop&w=900&q=85"
+      },
+      {
+        id: 11,
+        name: "白芝麻",
+        category: "調味料",
+        description:
+          "適合料理、烘焙、拌麵及製作芝麻醬。",
+        price: 70,
+        unit: "每包",
+        stock: 20,
+        is_available: true,
+        image_url:
+          "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=900&q=85"
+      },
+      {
+        id: 12,
+        name: "家庭用保鮮膜",
+        category: "日常雜貨",
+        description:
+          "適合家庭及餐飲業日常保存食材使用。",
+        price: 85,
+        unit: "每盒",
+        stock: 0,
+        is_available: false,
+        image_url:
+          "https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=900&q=85"
+      }
+    ];
+
+    /*
+     * 商品分類。
+     *
+     * 後續需要新增分類時，可以直接在這裡增加。
+     */
+    const categorySettings = [
+      {
+        name: "全部",
+        displayName: "全部商品",
+        icon: "🛒"
+      },
+      {
+        name: "雞蛋",
+        displayName: "雞蛋",
+        icon: "🥚"
+      },
+      {
+        name: "米類",
+        displayName: "米類",
+        icon: "🌾"
+      },
+      {
+        name: "食用油",
+        displayName: "食用油",
+        icon: "🫗"
+      },
+      {
+        name: "豆類",
+        displayName: "豆類",
+        icon: "🫘"
+      },
+      {
+        name: "麵類",
+        displayName: "麵類",
+        icon: "🍜"
+      },
+      {
+        name: "南北乾貨",
+        displayName: "南北乾貨",
+        icon: "🍄"
+      },
+      {
+        name: "調味料",
+        displayName: "調味料",
+        icon: "🧂"
+      },
+      {
+        name: "日常雜貨",
+        displayName: "日常雜貨",
+        icon: "🛍️"
+      }
+    ];
+
+    let allProducts = [];
+    let selectedCategory = "全部";
+    let searchKeyword = "";
+
+    const productGrid =
+      document.getElementById("productGrid");
+
+    const productCountText =
+      document.getElementById("productCountText");
+
+    const sidebarCategoryList =
+      document.getElementById("sidebarCategoryList");
+
+    const categoryToggleButton =
+      document.getElementById("categoryToggleButton");
+
+    const selectedCategoryText =
+      document.getElementById("selectedCategoryText");
+
+    const searchInput =
+      document.getElementById("searchInput");
+
+    const searchButton =
+      document.getElementById("searchButton");
+
+    const clearFilterButton =
+      document.getElementById("clearFilterButton");
+
+    const productModal =
+      document.getElementById("productModal");
+
+    const modalCloseButton =
+      document.getElementById("modalCloseButton");
+
+    /*
+     * ============================================================
+     * 載入商品
+     * ============================================================
+     */
+
+    async function loadProducts() {
+      productGrid.innerHTML =
+        '<div class="loading">商品載入中……</div>';
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/products`
+        );
+
+        if (!response.ok) {
+          throw new Error("商品 API 尚未建立");
+        }
+
+        const result = await response.json();
+
+        const products = Array.isArray(result)
+          ? result
+          : result.products;
+
+        if (!Array.isArray(products)) {
+          throw new Error("商品資料格式不正確");
+        }
+
+        allProducts = products.map(normalizeProduct);
+      } catch (error) {
+        console.warn(
+          "目前顯示範例商品：",
+          error.message
+        );
+
+        allProducts = sampleProducts;
+      }
+
+      renderSidebarCategories();
+      renderProducts();
+    }
+
+    /*
+     * 統一 API 商品欄位。
+     */
+    function normalizeProduct(product) {
+      return {
+        id: Number(product.id),
+        name: product.name || "未命名商品",
+        category:
+          product.category_name ||
+          product.category ||
+          "未分類",
+        description:
+          product.description ||
+          "目前尚未提供商品介紹。",
+        price: Number(product.price || 0),
+        unit: product.unit || "請洽店家",
+        stock: Number(product.stock || 0),
+        is_available:
+          product.is_available === undefined
+            ? true
+            : Boolean(product.is_available),
+        image_url:
+          product.image_url ||
+          "https://placehold.co/800x600?text=No+Image"
+      };
+    }
+
+    /*
+     * ============================================================
+     * 顯示左側分類
+     * ============================================================
+     */
+
+    function renderSidebarCategories() {
+      sidebarCategoryList.innerHTML =
+        categorySettings
+          .map((category) => {
+            const count =
+              category.name === "全部"
+                ? allProducts.length
+                : allProducts.filter(
+                    (product) =>
+                      product.category === category.name
+                  ).length;
+
+            const activeClass =
+              selectedCategory === category.name
+                ? "active"
+                : "";
+
+            return `
+              <button
+                type="button"
+                class="sidebar-category-button ${activeClass}"
+                onclick="selectCategory('${escapeHtml(
+                  category.name
+                )}')"
+              >
+                <span class="sidebar-category-name">
+                  <span class="sidebar-category-icon">
+                    ${category.icon}
+                  </span>
+
+                  <span>
+                    ${escapeHtml(category.displayName)}
+                  </span>
+                </span>
+
+                <span class="sidebar-category-count">
+                  ${count}
+                </span>
+              </button>
+            `;
+          })
+          .join("");
+    }
+
+    /*
+     * ============================================================
+     * 顯示商品
+     * ============================================================
+     */
+
+    function renderProducts() {
+      const keyword =
+        searchKeyword.trim().toLowerCase();
+
+      const filteredProducts =
+        allProducts.filter((product) => {
+          const categoryMatched =
+            selectedCategory === "全部" ||
+            product.category === selectedCategory;
+
+          const keywordMatched =
+            keyword === "" ||
+            product.name
+              .toLowerCase()
+              .includes(keyword) ||
+            product.category
+              .toLowerCase()
+              .includes(keyword) ||
+            product.description
+              .toLowerCase()
+              .includes(keyword);
+
+          return categoryMatched && keywordMatched;
+        });
+
+      const selectedSetting =
+        categorySettings.find(
+          (category) =>
+            category.name === selectedCategory
+        );
+
+      selectedCategoryText.textContent =
+        selectedSetting?.displayName || "全部商品";
+
+      productCountText.textContent =
+        `目前顯示 ${filteredProducts.length} 項商品。` +
+        "實際品牌、規格、價格及庫存請以店家現場為準。";
+
+      if (filteredProducts.length === 0) {
+        productGrid.innerHTML = `
+          <div class="empty-message">
+            <h3>找不到符合條件的商品</h3>
+            <p>
+              請嘗試其他關鍵字，或點選「顯示全部」。
+            </p>
+          </div>
+        `;
+
+        return;
+      }
+
+      productGrid.innerHTML =
+        filteredProducts
+          .map(createProductCard)
+          .join("");
+    }
+
+    /*
+     * 建立商品卡片。
+     */
+    function createProductCard(product) {
+      const priceText =
+        product.price > 0
+          ? `NT$ ${formatPrice(product.price)}`
+          : "請洽店家";
+
+      const stockClass =
+        product.is_available && product.stock > 0
+          ? ""
+          : "out";
+
+      const stockText =
+        product.is_available && product.stock > 0
+          ? "供應中"
+          : "目前缺貨";
+
+      return `
+        <article class="product-card">
+          <div class="product-image-wrapper">
+            <img
+              class="product-image"
+              src="${escapeHtml(product.image_url)}"
+              alt="${escapeHtml(product.name)}"
+              loading="lazy"
+              onerror="
+                this.onerror = null;
+                this.src =
+                  'https://placehold.co/800x600?text=No+Image';
+              "
+            />
+
+            <span class="stock-badge ${stockClass}">
+              ${stockText}
+            </span>
+          </div>
+
+          <div class="product-content">
+            <div class="product-category">
+              ${escapeHtml(product.category)}
+            </div>
+
+            <h3 class="product-name">
+              ${escapeHtml(product.name)}
+            </h3>
+
+            <p class="product-description">
+              ${escapeHtml(product.description)}
+            </p>
+
+            <div class="product-footer">
+              <div class="product-price">
+                ${priceText}
+
+                ${
+                  product.price > 0
+                    ? `
+                      <small>
+                        ${escapeHtml(product.unit)}
+                      </small>
+                    `
+                    : ""
+                }
+              </div>
+
+              <button
+                type="button"
+                class="detail-button"
+                onclick="openProductModal(${product.id})"
+              >
+                查看商品
+              </button>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    /*
+     * ============================================================
+     * 商品分類操作
+     * ============================================================
+     */
+
+    function toggleCategoryMenu() {
+      const isOpen =
+        sidebarCategoryList.classList.toggle("show");
+
+      categoryToggleButton.classList.toggle(
+        "open",
+        isOpen
+      );
+
+      categoryToggleButton.setAttribute(
+        "aria-expanded",
+        String(isOpen)
+      );
+    }
+
+    function closeCategoryMenu() {
+      sidebarCategoryList.classList.remove("show");
+      categoryToggleButton.classList.remove("open");
+
+      categoryToggleButton.setAttribute(
+        "aria-expanded",
+        "false"
+      );
+    }
+
+    function selectCategory(categoryName) {
+      selectedCategory = categoryName;
+      searchKeyword = "";
+      searchInput.value = "";
+
+      renderSidebarCategories();
+      renderProducts();
+
+      if (window.innerWidth <= 800) {
+        closeCategoryMenu();
+      }
+    }
+
+    function clearAllFilters() {
+      selectedCategory = "全部";
+      searchKeyword = "";
+      searchInput.value = "";
+
+      renderSidebarCategories();
+      renderProducts();
+    }
+
+    /*
+     * ============================================================
+     * 商品搜尋
+     * ============================================================
+     */
+
+    function searchProducts() {
+      searchKeyword = searchInput.value;
+      selectedCategory = "全部";
+
+      renderSidebarCategories();
+      renderProducts();
+
+      document
+        .getElementById("products")
+        .scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+    }
+
+    /*
+     * ============================================================
+     * 商品詳細視窗
+     * ============================================================
+     */
+
+    function openProductModal(productId) {
+      const product = allProducts.find(
+        (item) =>
+          Number(item.id) === Number(productId)
+      );
+
+      if (!product) {
+        alert("找不到這項商品。");
+        return;
+      }
+
+      const modalImage =
+        document.getElementById("modalImage");
+
+      modalImage.src = product.image_url;
+      modalImage.alt = product.name;
+
+      document.getElementById(
+        "modalCategory"
+      ).textContent = product.category;
+
+      document.getElementById(
+        "modalTitle"
+      ).textContent = product.name;
+
+      document.getElementById(
+        "modalDescription"
+      ).textContent = product.description;
+
+      document.getElementById(
+        "modalUnit"
+      ).textContent = product.unit;
+
+      document.getElementById(
+        "modalStock"
+      ).textContent =
+        product.is_available && product.stock > 0
+          ? "目前供應中"
+          : "目前缺貨";
+
+      document.getElementById(
+        "modalPrice"
+      ).textContent =
+        product.price > 0
+          ? `NT$ ${formatPrice(product.price)}`
+          : "價格請洽店家";
+
+      productModal.classList.add("show");
+      document.body.classList.add("modal-open");
+    }
+
+    function closeProductModal() {
+      productModal.classList.remove("show");
+      document.body.classList.remove("modal-open");
+    }
+
+    function scrollToContact() {
+      closeProductModal();
+
+      document
+        .getElementById("contact")
+        .scrollIntoView({
+          behavior: "smooth"
+        });
+    }
+
+    /*
+     * ============================================================
+     * 其他功能
+     * ============================================================
+     */
+
+    function formatPrice(price) {
+      return Number(price).toLocaleString("zh-TW");
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function goToAdmin() {
+      window.location.href = "/admin/login.html";
+    }
+
+    function showMapMessage(event) {
+      event.preventDefault();
+
+      alert(
+        "之後填入店家地址後，可以將這個按鈕連結到 Google 地圖。"
+      );
+    }
+
+    /*
+     * ============================================================
+     * 事件監聽
+     * ============================================================
+     */
+
+    categoryToggleButton.addEventListener(
+      "click",
+      toggleCategoryMenu
+    );
+
+    clearFilterButton.addEventListener(
+      "click",
+      clearAllFilters
+    );
+
+    searchButton.addEventListener(
+      "click",
+      searchProducts
+    );
+
+    searchInput.addEventListener(
+      "keydown",
+      (event) => {
+        if (event.key === "Enter") {
+          searchProducts();
+        }
+      }
+    );
+
+    document
+      .getElementById("menuButton")
+      .addEventListener("click", () => {
+        document
+          .getElementById("navLinks")
+          .classList.toggle("show");
+      });
+
+    document
+      .querySelectorAll(".nav-links a")
+      .forEach((link) => {
+        link.addEventListener("click", () => {
+          document
+            .getElementById("navLinks")
+            .classList.remove("show");
+        });
+      });
+
+    modalCloseButton.addEventListener(
+      "click",
+      closeProductModal
+    );
+
+    productModal.addEventListener(
+      "click",
+      (event) => {
+        if (event.target === productModal) {
+          closeProductModal();
+        }
+      }
+    );
+
+    document.addEventListener(
+      "keydown",
+      (event) => {
+        if (
+          event.key === "Escape" &&
+          productModal.classList.contains("show")
+        ) {
+          closeProductModal();
+        }
+      }
+    );
+
+    document.getElementById(
+      "currentYear"
+    ).textContent = new Date().getFullYear();
+
+    /*
+     * 啟動網頁。
+     */
+    loadProducts();
+  </script>
+</body>
+</html>
