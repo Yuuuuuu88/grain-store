@@ -42,7 +42,7 @@ app.use(
 // /admin/js/login.js
 app.use(
   "/admin",
-  express.static(path.join(__dirname, "manager"))
+  express.static(path.join(__dirname, "admin"))
 );
 
 // 再提供前台 public 靜態檔案
@@ -1366,7 +1366,7 @@ app.get("/admin", (req, res) => {
 
 app.get("/admin/admins", (req, res) => {
   return res.sendFile(
-    path.join(__dirname, "manager", "admins.html")
+    path.join(__dirname, "admin", "admins.html")
   );
 });
 
