@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>新增商品｜國宏蛋行後台</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --sidebar-width: 250px;
+      --brown-900: #30251d;
+      --brown-800: #443329;
+      --brown-700: #604633;
+      --brown-500: #a96831;
+      --brown-400: #c98646;
+      --brown-100: #f5e8d9;
+      --page-bg: #f6f2ed;
+      --card-bg: #ffffff;
+      --text-main: #2f2924;
+      --text-muted: #80756c;
+      --border: #e5ddd5;
+      --danger: #d44e4e;
+      --success: #2d9560;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family:
+        "Microsoft JhengHei",
+        "Noto Sans TC",
+        Arial,
+        sans-serif;
+      color: var(--text-main);
+      background: var(--page-bg);
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 1000;
+      width: var(--sidebar-width);
+      display: flex;
+      flex-direction: column;
+      color: #ffffff;
+      background:
+        radial-gradient(
+          circle at top left,
+          rgba(255, 255, 255, 0.08),
+          transparent 28%
+        ),
+        linear-gradient(
+          180deg,
+          #34281f,
+          #241c17
+        );
+      box-shadow: 8px 0 30px rgba(52, 37, 27, 0.1);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-height: 88px;
+      padding: 20px 22px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .brand-logo {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      border-radius: 15px;
+      background:
+        linear-gradient(
+          135deg,
+          #f4c57d,
+          #c77d32
+        );
+      font-size: 25px;
+      box-shadow:
+        0 12px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .brand-subtitle {
+      margin-top: 3px;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 12px;
+    }
+
+    .menu {
+      flex: 1;
+      padding: 22px 14px;
+    }
+
+    .menu-label {
+      padding: 0 13px 10px;
+      color: rgba(255, 255, 255, 0.38);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-height: 48px;
+      margin-bottom: 7px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 14px;
+      font-weight: 700;
+      transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+    }
+
+    .menu-item:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateX(2px);
+    }
+
+    .menu-item.active {
+      color: #ffffff;
+      background:
+        linear-gradient(
+          135deg,
+          #c98543,
+          #9f5c27
+        );
+      box-shadow:
+        0 10px 22px rgba(159, 92, 39, 0.24);
+    }
+
+    .menu-icon {
+      width: 24px;
+      text-align: center;
+      font-size: 19px;
+    }
+
+    .sidebar-footer {
+      padding: 15px 14px 22px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .logout-button {
+      width: 100%;
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 12px;
+      color: rgba(255, 255, 255, 0.75);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .logout-button:hover {
+      color: #ffffff;
+      background: rgba(212, 78, 78, 0.18);
+    }
+
+    .main-area {
+      min-height: 100vh;
+      margin-left: var(--sidebar-width);
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 900;
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 14px 30px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .mobile-menu-button {
+      display: none;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: #ffffff;
+      cursor: pointer;
+      font-size: 21px;
+    }
+
+    .page-title {
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .page-subtitle {
+      margin-top: 3px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .admin-profile {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .admin-profile-text {
+      text-align: right;
+    }
+
+    .admin-name {
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .admin-role {
+      margin-top: 2px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .admin-avatar {
+      width: 43px;
+      height: 43px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #f2e3d1;
+      color: var(--brown-500);
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .content {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 30px;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .breadcrumb a:hover {
+      color: var(--brown-500);
+    }
+
+    .page-intro {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 23px;
+      padding: 25px 27px;
+      border-radius: 20px;
+      color: #ffffff;
+      background:
+        radial-gradient(
+          circle at top right,
+          rgba(255, 255, 255, 0.24),
+          transparent 34%
+        ),
+        linear-gradient(
+          135deg,
+          #a9622d,
+          #ddaa63
+        );
+      box-shadow:
+        0 16px 35px rgba(159, 92, 39, 0.16);
+    }
+
+    .page-intro h1 {
+      font-size: 28px;
+      font-weight: 900;
+    }
+
+    .page-intro p {
+      margin-top: 8px;
+      color: rgba(255, 255, 255, 0.82);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .intro-icon {
+      font-size: 62px;
+    }
+
+    .form-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .form-card,
+    .side-card {
+      border: 1px solid var(--border);
+      border-radius: 19px;
+      background: var(--card-bg);
+      box-shadow:
+        0 10px 28px rgba(72, 54, 40, 0.06);
+    }
+
+    .form-card {
+      padding: 27px;
+    }
+
+    .section-header {
+      margin-bottom: 22px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .section-description {
+      margin-top: 5px;
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 19px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      margin-bottom: 8px;
+      color: #4b4038;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .required {
+      margin-left: 3px;
+      color: var(--danger);
+    }
+
+    .form-hint {
+      margin-top: 7px;
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      border: 1px solid #dcd2c8;
+      border-radius: 12px;
+      outline: none;
+      color: var(--text-main);
+      background: #fffdfb;
+      transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+    }
+
+    .form-input,
+    .form-select {
+      height: 49px;
+      padding: 0 13px;
+    }
+
+    .form-textarea {
+      min-height: 130px;
+      padding: 13px;
+      resize: vertical;
+      line-height: 1.7;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: var(--brown-400);
+      background: #ffffff;
+      box-shadow:
+        0 0 0 4px rgba(201, 134, 70, 0.12);
+    }
+
+    .price-wrapper {
+      position: relative;
+    }
+
+    .price-symbol {
+      position: absolute;
+      top: 50%;
+      left: 14px;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-weight: 800;
+    }
+
+    .price-wrapper .form-input {
+      padding-left: 35px;
+    }
+
+    .switch-row {
+      min-height: 49px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 0 14px;
+      border: 1px solid #dcd2c8;
+      border-radius: 12px;
+      background: #fffdfb;
+    }
+
+    .switch-text {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .switch {
+      position: relative;
+      width: 48px;
+      height: 27px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      width: 0;
+      height: 0;
+      opacity: 0;
+    }
+
+    .switch-slider {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: #cfc6be;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .switch-slider::before {
+      content: "";
+      position: absolute;
+      width: 21px;
+      height: 21px;
+      left: 3px;
+      top: 3px;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.2);
+      transition: transform 0.2s ease;
+    }
+
+    .switch input:checked + .switch-slider {
+      background: var(--success);
+    }
+
+    .switch input:checked + .switch-slider::before {
+      transform: translateX(21px);
+    }
+
+    .form-message {
+      display: none;
+      margin-top: 20px;
+      padding: 13px 15px;
+      border-radius: 11px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .form-message.error {
+      display: block;
+      color: #a93636;
+      background: #fff0f0;
+      border: 1px solid #f2caca;
+    }
+
+    .form-message.success {
+      display: block;
+      color: #22784b;
+      background: #ecfaf3;
+      border: 1px solid #bee7d1;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 25px;
+      padding-top: 22px;
+      border-top: 1px solid var(--border);
+    }
+
+    .button {
+      min-height: 47px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 900;
+      cursor: pointer;
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        opacity 0.2s ease;
+    }
+
+    .button-secondary {
+      border: 1px solid var(--border);
+      color: #62584f;
+      background: #ffffff;
+    }
+
+    .button-secondary:hover {
+      background: #faf7f3;
+    }
+
+    .button-primary {
+      border: none;
+      color: #ffffff;
+      background:
+        linear-gradient(
+          135deg,
+          #ce8741,
+          #a45e28
+        );
+      box-shadow:
+        0 10px 22px rgba(164, 94, 40, 0.2);
+    }
+
+    .button-primary:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 14px 26px rgba(164, 94, 40, 0.27);
+    }
+
+    .button:disabled {
+      opacity: 0.62;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .side-column {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .side-card {
+      overflow: hidden;
+    }
+
+    .side-card-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .side-card-title {
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .side-card-body {
+      padding: 20px;
+    }
+
+    .image-preview {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px dashed #d6cabf;
+      border-radius: 14px;
+      background:
+        linear-gradient(
+          135deg,
+          #faf7f3,
+          #f0e8df
+        );
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .image-preview img {
+      width: 100%;
+      height: 100%;
+      display: none;
+      object-fit: cover;
+    }
+
+    .image-placeholder-icon {
+      margin-bottom: 7px;
+      font-size: 36px;
+    }
+
+    .image-placeholder-text {
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .preview-product {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #fbf9f6;
+    }
+
+    .preview-name {
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .preview-category {
+      margin-top: 5px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .preview-price {
+      margin-top: 14px;
+      color: var(--brown-500);
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .preview-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .sidebar-overlay {
+      display: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 1050px) {
+      .form-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .side-column {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+      }
+
+      body.sidebar-open .sidebar {
+        transform: translateX(0);
+      }
+
+      .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 950;
+        display: none;
+        background: rgba(0, 0, 0, 0.43);
+      }
+
+      body.sidebar-open .sidebar-overlay {
+        display: block;
+      }
+
+      .main-area {
+        margin-left: 0;
+      }
+
+      .mobile-menu-button {
+        display: grid;
+        place-items: center;
+      }
+
+      .topbar {
+        padding: 12px 16px;
+      }
+
+      .page-subtitle,
+      .admin-profile-text {
+        display: none;
+      }
+
+      .content {
+        padding: 20px 15px;
+      }
+
+      .page-intro {
+        padding: 22px 20px;
+      }
+
+      .page-intro h1 {
+        font-size: 23px;
+      }
+
+      .intro-icon {
+        display: none;
+      }
+
+      .form-card {
+        padding: 21px 17px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group.full {
+        grid-column: auto;
+      }
+
+      .side-column {
+        grid-template-columns: 1fr;
+      }
+
+      .form-actions {
+        flex-direction: column-reverse;
+      }
+
+      .button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">🥚</div>
+
+      <div>
+        <div class="brand-name">國宏蛋行</div>
+        <div class="brand-subtitle">後台管理系統</div>
+      </div>
+    </div>
+
+    <nav class="menu">
+      <div class="menu-label">主要功能</div>
+
+      <a href="/admin/dashboard.html" class="menu-item">
+        <span class="menu-icon">🏠</span>
+        <span>Dashboard</span>
+      </a>
+
+      <a href="/admin/products.html" class="menu-item">
+        <span class="menu-icon">📦</span>
+        <span>商品管理</span>
+      </a>
+
+      <a
+        href="/admin/product-form.html"
+        class="menu-item active"
+      >
+        <span class="menu-icon">➕</span>
+        <span>新增商品</span>
+      </a>
+
+      <a
+        href="/admin/admins.html"
+        class="menu-item owner-only"
+      >
+        <span class="menu-icon">👥</span>
+        <span>管理員管理</span>
+      </a>
+
+      <a href="/admin/logs.html" class="menu-item">
+        <span class="menu-icon">📝</span>
+        <span>操作紀錄</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button
+        type="button"
+        id="logoutButton"
+        class="logout-button"
+      >
+        <span class="menu-icon">🚪</span>
+        <span>登出</span>
+      </button>
+    </div>
+  </aside>
+
+  <div
+    id="sidebarOverlay"
+    class="sidebar-overlay"
+  ></div>
+
+  <main class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button
+          type="button"
+          id="mobileMenuButton"
+          class="mobile-menu-button"
+          aria-label="開啟選單"
+        >
+          ☰
+        </button>
+
+        <div>
+          <div class="page-title">新增商品</div>
+          <div class="page-subtitle">
+            建立新的商品、價格與庫存資料
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-profile">
+        <div class="admin-profile-text">
+          <div id="adminName" class="admin-name">
+            載入中
+          </div>
+
+          <div id="adminRole" class="admin-role">
+            —
+          </div>
+        </div>
+
+        <div id="adminAvatar" class="admin-avatar">
+          管
+        </div>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="breadcrumb">
+        <a href="/admin/dashboard.html">Dashboard</a>
+        <span>›</span>
+        <a href="/admin/products.html">商品管理</a>
+        <span>›</span>
+        <span>新增商品</span>
+      </div>
+
+      <section class="page-intro">
+        <div>
+          <h1>新增商品資料</h1>
+
+          <p>
+            填寫商品名稱、售價、成本、庫存與圖片網址，
+            完成後商品會直接寫入 PostgreSQL。
+          </p>
+        </div>
+
+        <div class="intro-icon">📦</div>
+      </section>
+
+      <div class="form-layout">
+        <form id="productForm" class="form-card">
+          <div class="section-header">
+            <div class="section-title">基本資料</div>
+
+            <div class="section-description">
+              標示星號的欄位為必填資料。
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group full">
+              <label for="name" class="form-label">
+                商品名稱
+                <span class="required">*</span>
+              </label>
+
+              <input
+                type="text"
+                id="name"
+                name="name"
+                class="form-input"
+                placeholder="例如：新鮮紅殼雞蛋"
+                maxlength="100"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="category" class="form-label">
+                商品分類
+                <span class="required">*</span>
+              </label>
+
+              <select
+                id="category"
+                name="category"
+                class="form-select"
+                required
+              >
+                <option value="">請選擇分類</option>
+                <option value="雞蛋">雞蛋</option>
+                <option value="皮蛋">皮蛋</option>
+                <option value="鹹蛋">鹹蛋</option>
+                <option value="加工蛋品">加工蛋品</option>
+                <option value="其他">其他</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="unit" class="form-label">
+                商品單位
+                <span class="required">*</span>
+              </label>
+
+              <input
+                type="text"
+                id="unit"
+                name="unit"
+                class="form-input"
+                placeholder="例如：盒、斤、台斤"
+                maxlength="30"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="salePrice" class="form-label">
+                商品售價
+                <span class="required">*</span>
+              </label>
+
+              <div class="price-wrapper">
+                <span class="price-symbol">$</span>
+
+                <input
+                  type="number"
+                  id="salePrice"
+                  name="salePrice"
+                  class="form-input"
+                  placeholder="0"
+                  min="0"
+                  step="0.01"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="costPrice" class="form-label">
+                商品成本
+                <span class="required">*</span>
+              </label>
+
+              <div class="price-wrapper">
+                <span class="price-symbol">$</span>
+
+                <input
+                  type="number"
+                  id="costPrice"
+                  name="costPrice"
+                  class="form-input"
+                  placeholder="0"
+                  min="0"
+                  step="0.01"
+                  required
+                />
+              </div>
+
+              <div class="form-hint">
+                成本僅供後台人員查看。
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="stock" class="form-label">
+                初始庫存
+                <span class="required">*</span>
+              </label>
+
+              <input
+                type="number"
+                id="stock"
+                name="stock"
+                class="form-input"
+                placeholder="0"
+                min="0"
+                step="1"
+                value="0"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                上架狀態
+              </label>
+
+              <div class="switch-row">
+                <span class="switch-text">
+                  建立後立即上架
+                </span>
+
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    id="isAvailable"
+                    name="isAvailable"
+                    checked
+                  />
+
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group full">
+              <label for="imageUrl" class="form-label">
+                商品圖片網址
+              </label>
+
+              <input
+                type="url"
+                id="imageUrl"
+                name="imageUrl"
+                class="form-input"
+                placeholder="https://example.com/product.jpg"
+              />
+
+              <div class="form-hint">
+                目前先使用圖片網址，之後再串 Cloudinary 上傳。
+              </div>
+            </div>
+
+            <div class="form-group full">
+              <label for="description" class="form-label">
+                商品介紹
+              </label>
+
+              <textarea
+                id="description"
+                name="description"
+                class="form-textarea"
+                placeholder="請輸入商品特色、規格或保存方式"
+                maxlength="1000"
+              ></textarea>
+            </div>
+          </div>
+
+          <div
+            id="formMessage"
+            class="form-message"
+            aria-live="polite"
+          ></div>
+
+          <div class="form-actions">
+            <a
+              href="/admin/products.html"
+              class="button button-secondary"
+            >
+              取消
+            </a>
+
+            <button
+              type="submit"
+              id="submitButton"
+              class="button button-primary"
+            >
+              ＋ 建立商品
+            </button>
+          </div>
+        </form>
+
+        <aside class="side-column">
+          <section class="side-card">
+            <div class="side-card-header">
+              <div class="side-card-title">
+                商品圖片預覽
+              </div>
+            </div>
+
+            <div class="side-card-body">
+              <div class="image-preview">
+                <div id="imagePlaceholder">
+                  <div class="image-placeholder-icon">
+                    🖼️
+                  </div>
+
+                  <div class="image-placeholder-text">
+                    輸入圖片網址後<br />
+                    會在這裡顯示預覽
+                  </div>
+                </div>
+
+                <img
+                  id="previewImage"
+                  alt="商品圖片預覽"
+                />
+              </div>
+            </div>
+          </section>
+
+          <section class="side-card">
+            <div class="side-card-header">
+              <div class="side-card-title">
+                前台顯示預覽
+              </div>
+            </div>
+
+            <div class="side-card-body">
+              <div class="preview-product">
+                <div id="previewName" class="preview-name">
+                  商品名稱
+                </div>
+
+                <div
+                  id="previewCategory"
+                  class="preview-category"
+                >
+                  尚未選擇分類
+                </div>
+
+                <div
+                  id="previewPrice"
+                  class="preview-price"
+                >
+                  NT$ 0
+                </div>
+
+                <div class="preview-meta">
+                  <span id="previewStock">
+                    庫存：0
+                  </span>
+
+                  <span id="previewStatus">
+                    上架
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <script src="/admin/js/products.js"></script>
+</body>
+</html>

@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>商品管理｜國宏蛋行後台</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --sidebar-width: 250px;
+      --page-bg: #f6f2ed;
+      --card-bg: #ffffff;
+      --text-main: #302a25;
+      --text-muted: #82776e;
+      --border: #e4ddd5;
+      --brown-700: #5e4432;
+      --brown-500: #a8642d;
+      --brown-400: #c98543;
+      --success: #2f9b63;
+      --warning: #dca32d;
+      --danger: #d65353;
+      --info: #4d78c5;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family:
+        "Microsoft JhengHei",
+        "Noto Sans TC",
+        Arial,
+        sans-serif;
+      color: var(--text-main);
+      background: var(--page-bg);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 1000;
+      width: var(--sidebar-width);
+      display: flex;
+      flex-direction: column;
+      color: #ffffff;
+      background:
+        radial-gradient(
+          circle at top left,
+          rgba(255, 255, 255, 0.08),
+          transparent 28%
+        ),
+        linear-gradient(180deg, #34281f, #241c17);
+      box-shadow: 8px 0 30px rgba(52, 37, 27, 0.1);
+    }
+
+    .brand {
+      min-height: 88px;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 20px 22px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .brand-logo {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: linear-gradient(135deg, #f4c57d, #c77d32);
+      font-size: 25px;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .brand-subtitle {
+      margin-top: 3px;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 12px;
+    }
+
+    .menu {
+      flex: 1;
+      padding: 22px 14px;
+    }
+
+    .menu-label {
+      padding: 0 13px 10px;
+      color: rgba(255, 255, 255, 0.38);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+    }
+
+    .menu-item {
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 7px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 14px;
+      font-weight: 700;
+      transition: 0.2s ease;
+    }
+
+    .menu-item:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateX(2px);
+    }
+
+    .menu-item.active {
+      color: #ffffff;
+      background: linear-gradient(135deg, #c98543, #9f5c27);
+      box-shadow: 0 10px 22px rgba(159, 92, 39, 0.24);
+    }
+
+    .menu-icon {
+      width: 24px;
+      text-align: center;
+      font-size: 19px;
+    }
+
+    .sidebar-footer {
+      padding: 15px 14px 22px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .logout-button {
+      width: 100%;
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 12px;
+      color: rgba(255, 255, 255, 0.75);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .logout-button:hover {
+      color: #ffffff;
+      background: rgba(214, 83, 83, 0.18);
+    }
+
+    .main-area {
+      min-height: 100vh;
+      margin-left: var(--sidebar-width);
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 900;
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 30px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .mobile-menu-button {
+      display: none;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: #ffffff;
+      cursor: pointer;
+      font-size: 21px;
+    }
+
+    .page-title {
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .page-subtitle {
+      margin-top: 3px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .admin-profile {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .admin-profile-text {
+      text-align: right;
+    }
+
+    .admin-name {
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .admin-role {
+      margin-top: 2px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .admin-avatar {
+      width: 43px;
+      height: 43px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #f2e3d1;
+      color: var(--brown-500);
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .content {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 30px;
+    }
+
+    .hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 22px;
+      padding: 26px 28px;
+      border-radius: 20px;
+      color: #ffffff;
+      background:
+        radial-gradient(
+          circle at top right,
+          rgba(255, 255, 255, 0.24),
+          transparent 34%
+        ),
+        linear-gradient(135deg, #a9622d, #ddaa63);
+      box-shadow: 0 16px 35px rgba(159, 92, 39, 0.16);
+    }
+
+    .hero h1 {
+      font-size: 28px;
+      font-weight: 900;
+    }
+
+    .hero p {
+      margin-top: 8px;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .add-button {
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 18px;
+      border-radius: 12px;
+      color: #7d471e;
+      background: #ffffff;
+      font-size: 14px;
+      font-weight: 900;
+      box-shadow: 0 10px 24px rgba(72, 42, 22, 0.14);
+    }
+
+    .add-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) 200px 190px auto;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      background: #ffffff;
+      box-shadow: 0 9px 25px rgba(72, 54, 40, 0.05);
+    }
+
+    .search-wrapper {
+      position: relative;
+    }
+
+    .search-icon {
+      position: absolute;
+      top: 50%;
+      left: 14px;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .control {
+      width: 100%;
+      height: 46px;
+      border: 1px solid #dcd3ca;
+      border-radius: 11px;
+      outline: none;
+      background: #fffdfb;
+      color: var(--text-main);
+    }
+
+    input.control {
+      padding: 0 13px 0 42px;
+    }
+
+    select.control {
+      padding: 0 12px;
+    }
+
+    .control:focus {
+      border-color: var(--brown-400);
+      box-shadow: 0 0 0 4px rgba(201, 133, 67, 0.12);
+    }
+
+    .refresh-button {
+      min-height: 46px;
+      padding: 0 16px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      color: #62584f;
+      background: #ffffff;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .refresh-button:hover {
+      background: #faf7f3;
+    }
+
+    .summary-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 14px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .table-card {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: #ffffff;
+      box-shadow: 0 10px 28px rgba(72, 54, 40, 0.06);
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 1040px;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: #f7f3ee;
+    }
+
+    th {
+      padding: 15px 16px;
+      color: #746a61;
+      font-size: 12px;
+      font-weight: 900;
+      text-align: left;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 15px 16px;
+      border-top: 1px solid #eee8e2;
+      vertical-align: middle;
+      font-size: 13px;
+    }
+
+    tbody tr:hover {
+      background: #fffaf5;
+    }
+
+    .product-cell {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-width: 230px;
+    }
+
+    .product-image {
+      width: 58px;
+      height: 58px;
+      flex-shrink: 0;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #faf5ef, #eee3d7);
+      color: #a28f7e;
+      font-size: 24px;
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product-name {
+      font-weight: 900;
+      color: #392f28;
+    }
+
+    .product-description {
+      max-width: 230px;
+      margin-top: 5px;
+      overflow: hidden;
+      color: var(--text-muted);
+      font-size: 12px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .category-badge,
+    .status-badge,
+    .stock-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .category-badge {
+      color: #76512f;
+      background: #f5e8d9;
+    }
+
+    .status-badge.available {
+      color: #237a4d;
+      background: #e9f8f0;
+    }
+
+    .status-badge.unavailable {
+      color: #a54040;
+      background: #fff0f0;
+    }
+
+    .stock-badge.normal {
+      color: #3d6eaa;
+      background: #eef4fc;
+    }
+
+    .stock-badge.low {
+      color: #996c10;
+      background: #fff6dc;
+    }
+
+    .stock-badge.empty {
+      color: #a53d3d;
+      background: #fff0f0;
+    }
+
+    .price-main {
+      font-weight: 900;
+      color: var(--brown-500);
+    }
+
+    .price-cost {
+      margin-top: 4px;
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
+    }
+
+    .action-button {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 11px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: #ffffff;
+      color: #655b52;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .action-button:hover {
+      background: #f8f4ef;
+    }
+
+    .action-button.toggle {
+      color: #9b5d27;
+      border-color: #ecd3b9;
+      background: #fff7ef;
+    }
+
+    .action-button.delete {
+      color: #b34343;
+      border-color: #efcccc;
+      background: #fff5f5;
+    }
+
+    .action-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .empty-state,
+    .loading-state {
+      padding: 70px 20px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .state-icon {
+      margin-bottom: 12px;
+      font-size: 46px;
+    }
+
+    .state-title {
+      color: #4c423a;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .state-text {
+      margin-top: 7px;
+      font-size: 13px;
+    }
+
+    .message {
+      display: none;
+      margin-bottom: 15px;
+      padding: 12px 14px;
+      border-radius: 11px;
+      font-size: 13px;
+    }
+
+    .message.success {
+      display: block;
+      color: #23794d;
+      border: 1px solid #bee5d0;
+      background: #ecfaf3;
+    }
+
+    .message.error {
+      display: block;
+      color: #a63b3b;
+      border: 1px solid #efcaca;
+      background: #fff0f0;
+    }
+
+    .sidebar-overlay {
+      display: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 1050px) {
+      .toolbar {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+      }
+
+      body.sidebar-open .sidebar {
+        transform: translateX(0);
+      }
+
+      .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 950;
+        display: none;
+        background: rgba(0, 0, 0, 0.43);
+      }
+
+      body.sidebar-open .sidebar-overlay {
+        display: block;
+      }
+
+      .main-area {
+        margin-left: 0;
+      }
+
+      .mobile-menu-button {
+        display: grid;
+        place-items: center;
+      }
+
+      .topbar {
+        padding: 12px 16px;
+      }
+
+      .page-subtitle,
+      .admin-profile-text {
+        display: none;
+      }
+
+      .content {
+        padding: 20px 15px;
+      }
+
+      .hero {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 22px 20px;
+      }
+
+      .hero h1 {
+        font-size: 23px;
+      }
+
+      .add-button {
+        width: 100%;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">🥚</div>
+
+      <div>
+        <div class="brand-name">國宏蛋行</div>
+        <div class="brand-subtitle">後台管理系統</div>
+      </div>
+    </div>
+
+    <nav class="menu">
+      <div class="menu-label">主要功能</div>
+
+      <a href="/admin/dashboard.html" class="menu-item">
+        <span class="menu-icon">🏠</span>
+        <span>Dashboard</span>
+      </a>
+
+      <a
+        href="/admin/products.html"
+        class="menu-item active"
+      >
+        <span class="menu-icon">📦</span>
+        <span>商品管理</span>
+      </a>
+
+      <a
+        href="/admin/product-form.html"
+        class="menu-item editable-only"
+      >
+        <span class="menu-icon">➕</span>
+        <span>新增商品</span>
+      </a>
+
+      <a
+        href="/admin/admins.html"
+        class="menu-item owner-only"
+      >
+        <span class="menu-icon">👥</span>
+        <span>管理員管理</span>
+      </a>
+
+      <a href="/admin/logs.html" class="menu-item">
+        <span class="menu-icon">📝</span>
+        <span>操作紀錄</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button
+        type="button"
+        id="logoutButton"
+        class="logout-button"
+      >
+        <span class="menu-icon">🚪</span>
+        <span>登出</span>
+      </button>
+    </div>
+  </aside>
+
+  <div
+    id="sidebarOverlay"
+    class="sidebar-overlay"
+  ></div>
+
+  <main class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button
+          type="button"
+          id="mobileMenuButton"
+          class="mobile-menu-button"
+        >
+          ☰
+        </button>
+
+        <div>
+          <div class="page-title">商品管理</div>
+          <div class="page-subtitle">
+            查看商品、庫存、價格與上下架狀態
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-profile">
+        <div class="admin-profile-text">
+          <div id="adminName" class="admin-name">
+            載入中
+          </div>
+
+          <div id="adminRole" class="admin-role">
+            —
+          </div>
+        </div>
+
+        <div id="adminAvatar" class="admin-avatar">
+          管
+        </div>
+      </div>
+    </header>
+
+    <section class="content">
+      <section class="hero">
+        <div>
+          <h1>商品列表</h1>
+
+          <p>
+            可搜尋商品、查看庫存、切換上下架狀態，
+            最高管理員也能刪除商品。
+          </p>
+        </div>
+
+        <a
+          href="/admin/product-form.html"
+          class="add-button editable-only"
+        >
+          ＋ 新增商品
+        </a>
+      </section>
+
+      <div
+        id="pageMessage"
+        class="message"
+      ></div>
+
+      <section class="toolbar">
+        <div class="search-wrapper">
+          <span class="search-icon">🔎</span>
+
+          <input
+            type="search"
+            id="searchInput"
+            class="control"
+            placeholder="搜尋商品名稱、分類或介紹"
+          />
+        </div>
+
+        <select id="categoryFilter" class="control">
+          <option value="">所有分類</option>
+          <option value="雞蛋">雞蛋</option>
+          <option value="皮蛋">皮蛋</option>
+          <option value="鹹蛋">鹹蛋</option>
+          <option value="加工蛋品">加工蛋品</option>
+          <option value="其他">其他</option>
+        </select>
+
+        <select id="statusFilter" class="control">
+          <option value="">所有狀態</option>
+          <option value="available">上架商品</option>
+          <option value="unavailable">下架商品</option>
+          <option value="low_stock">低庫存</option>
+          <option value="out_of_stock">缺貨商品</option>
+        </select>
+
+        <button
+          type="button"
+          id="refreshButton"
+          class="refresh-button"
+        >
+          重新整理
+        </button>
+      </section>
+
+      <div class="summary-row">
+        <div>
+          共找到
+          <strong id="productCount">0</strong>
+          項商品
+        </div>
+
+        <div id="lastUpdated">
+          尚未載入
+        </div>
+      </div>
+
+      <section class="table-card">
+        <div id="loadingState" class="loading-state">
+          <div class="state-icon">⏳</div>
+          <div class="state-title">正在載入商品</div>
+          <div class="state-text">請稍候</div>
+        </div>
+
+        <div id="emptyState" class="empty-state hidden">
+          <div class="state-icon">📦</div>
+          <div class="state-title">找不到商品</div>
+          <div class="state-text">
+            請調整搜尋條件，或新增第一個商品。
+          </div>
+        </div>
+
+        <div
+          id="tableContainer"
+          class="table-scroll hidden"
+        >
+          <table>
+            <thead>
+              <tr>
+                <th>商品</th>
+                <th>分類</th>
+                <th>售價／成本</th>
+                <th>庫存</th>
+                <th>單位</th>
+                <th>狀態</th>
+                <th>更新時間</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+
+            <tbody id="productTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="/admin/js/products.js"></script>
+</body>
+</html>
