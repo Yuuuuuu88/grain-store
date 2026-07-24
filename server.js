@@ -834,42 +834,502 @@ app.get("/api/products", async (req, res) => {
   }
 });
 
-// ==================== 管理員列表 ====================
-app.get("/api/admin/admins", authenticateAdmin, async (req, res) => {
-  try {
-    // 只有超級管理員可以查看
-    if (req.admin.role !== "super_admin") {
-      return res.status(403).json({
-        success: false,
-        message: "沒有權限"
-      });
-    }
+// ======================================================
+// 管理員管理 API
+// 只有 super_admin 可以使用
+// ======================================================
 
-    const result = await pool.query(`
-      SELECT
-        id,
-        username,
-        display_name,
-        role,
-        is_active,
-        created_at
-      FROM admins
-      ORDER BY created_at ASC
-    `);
-
-    res.json({
-      success: true,
-      admins: result.rows
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
+function requireSuperAdmin(req, res, next) {
+  if (!req.admin || req.admin.role !== "owner") {
+    return res.status(403).json({
       success: false,
-      message: "取得管理員失敗"
+      message: "只有最高管理員可以執行此操作"
     });
   }
-});
+
+  next();
+}
+
+// ------------------------------------------------------
+// 取得全部管理員
+// GET /api/admin/admins
+// ------------------------------------------------------
+app.get(
+  "/api/admin/admins",
+  authenticateAdmin,
+  requireSuperAdmin,
+  async (req, res) => {
+    try {
+      const result = await pool.query(`
+        SELECT
+          id,
+          username,
+          display_name,
+          role,
+          is_active,
+          created_at,
+          updated_at
+        FROM admins
+        ORDER BY created_at ASC
+      `);
+
+      return res.json({
+        success: true,
+        admins: result.rows
+      });
+    } catch (error) {
+      console.error("取得管理員列表失敗：", error);
+
+      return res.status(500).json({
+        success: false,
+        message: "取得管理員列表失敗"
+      });
+    }
+  }
+);
+
+
+// ------------------------------------------------------
+// 新增管理員
+// POST /api/admin/admins
+// ------------------------------------------------------
+app.post(
+  "/api/admin/admins",
+  authenticateAdmin,
+  requireSuperAdmin,
+  async (req, res) => {
+    try {
+      let {
+        username,
+        password,
+        display_name,
+        role = "admin"
+      } = req.body;
+
+      username = String(username || "").trim();
+      password = String(password || "");
+      display_name = String(display_name || "").trim();
+      role = String(role || "admin").trim();
+
+      if (!username || !password || !display_name) {
+        return res.status(400).json({
+          success: false,
+          message: "請完整輸入帳號、密碼與顯示名稱"
+        });
+      }
+
+      if (username.length < 3 || username.length > 50) {
+        return res.status(400).json({
+          success: false,
+          message: "帳號長度必須為 3～50 個字元"
+        });
+      }
+
+      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        return res.status(400).json({
+          success: false,
+          message: "帳號只能使用英文字母、數字與底線"
+        });
+      }
+
+      if (password.length < 6) {
+        return res.status(400).json({
+          success: false,
+          message: "密碼至少需要 6 個字元"
+        });
+      }
+
+      if (!["manager", "owner"].includes(role)) {
+        return res.status(400).json({
+          success: false,
+          message: "管理員權限格式錯誤"
+        });
+      }
+
+      const duplicateResult = await pool.query(
+        `
+        SELECT id
+        FROM admins
+        WHERE LOWER(username) = LOWER($1)
+        LIMIT 1
+        `,
+        [username]
+      );
+
+      if (duplicateResult.rowCount > 0) {
+        return res.status(409).json({
+          success: false,
+          message: "此管理員帳號已經存在"
+        });
+      }
+
+      const passwordHash = await bcrypt.hash(password, 10);
+
+      const result = await pool.query(
+        `
+        INSERT INTO admins (
+          username,
+          password_hash,
+          display_name,
+          role,
+          is_active,
+          created_at,
+          updated_at
+        )
+        VALUES ($1, $2, $3, $4, true, NOW(), NOW())
+        RETURNING
+          id,
+          username,
+          display_name,
+          role,
+          is_active,
+          created_at,
+          updated_at
+        `,
+        [
+          username,
+          passwordHash,
+          display_name,
+          role
+        ]
+      );
+
+      return res.status(201).json({
+        success: true,
+        message: "管理員新增成功",
+        admin: result.rows[0]
+      });
+    } catch (error) {
+      console.error("新增管理員失敗：", error);
+
+      return res.status(500).json({
+        success: false,
+        message: "新增管理員失敗"
+      });
+    }
+  }
+);
+
+
+// ------------------------------------------------------
+// 修改管理員資料
+// PUT /api/admin/admins/:id
+// 密碼留空時，不修改密碼
+// ------------------------------------------------------
+app.put(
+  "/api/admin/admins/:id",
+  authenticateAdmin,
+  requireSuperAdmin,
+  async (req, res) => {
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      const adminId = Number(req.params.id);
+
+      let {
+        display_name,
+        role,
+        password
+      } = req.body;
+
+      display_name = String(display_name || "").trim();
+      role = String(role || "").trim();
+      password = String(password || "");
+
+      if (!Number.isInteger(adminId) || adminId <= 0) {
+        await client.query("ROLLBACK");
+
+        return res.status(400).json({
+          success: false,
+          message: "管理員編號錯誤"
+        });
+      }
+
+      if (!display_name) {
+        await client.query("ROLLBACK");
+
+        return res.status(400).json({
+          success: false,
+          message: "請輸入顯示名稱"
+        });
+      }
+
+      if (!["manager", "owner"].includes(role)) {
+        await client.query("ROLLBACK");
+
+        return res.status(400).json({
+          success: false,
+          message: "管理員權限格式錯誤"
+        });
+      }
+
+      if (password && password.length < 6) {
+        await client.query("ROLLBACK");
+
+        return res.status(400).json({
+          success: false,
+          message: "新密碼至少需要 6 個字元"
+        });
+      }
+
+      const targetResult = await client.query(
+        `
+        SELECT id, username, role, is_active
+        FROM admins
+        WHERE id = $1
+        FOR UPDATE
+        `,
+        [adminId]
+      );
+
+      if (targetResult.rowCount === 0) {
+        await client.query("ROLLBACK");
+
+        return res.status(404).json({
+          success: false,
+          message: "找不到這位管理員"
+        });
+      }
+
+      const targetAdmin = targetResult.rows[0];
+
+      // 防止把最後一位啟用中的超級管理員降級
+      if (
+        targetAdmin.role === "super_admin" &&
+        role !== "super_admin" &&
+        targetAdmin.is_active
+      ) {
+        const countResult = await client.query(`
+          SELECT COUNT(*)::int AS count
+          FROM admins
+          WHERE role = 'super_admin'
+            AND is_active = true
+        `);
+
+        if (countResult.rows[0].count <= 1) {
+          await client.query("ROLLBACK");
+
+          return res.status(400).json({
+            success: false,
+            message: "系統至少要保留一位啟用中的超級管理員"
+          });
+        }
+      }
+
+      let result;
+
+      if (password) {
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        result = await client.query(
+          `
+          UPDATE admins
+          SET
+            display_name = $1,
+            role = $2,
+            password_hash = $3,
+            updated_at = NOW()
+          WHERE id = $4
+          RETURNING
+            id,
+            username,
+            display_name,
+            role,
+            is_active,
+            created_at,
+            updated_at
+          `,
+          [
+            display_name,
+            role,
+            passwordHash,
+            adminId
+          ]
+        );
+      } else {
+        result = await client.query(
+          `
+          UPDATE admins
+          SET
+            display_name = $1,
+            role = $2,
+            updated_at = NOW()
+          WHERE id = $3
+          RETURNING
+            id,
+            username,
+            display_name,
+            role,
+            is_active,
+            created_at,
+            updated_at
+          `,
+          [
+            display_name,
+            role,
+            adminId
+          ]
+        );
+      }
+
+      await client.query("COMMIT");
+
+      return res.json({
+        success: true,
+        message: "管理員資料修改成功",
+        admin: result.rows[0]
+      });
+    } catch (error) {
+      await client.query("ROLLBACK");
+
+      console.error("修改管理員失敗：", error);
+
+      return res.status(500).json({
+        success: false,
+        message: "修改管理員失敗"
+      });
+    } finally {
+      client.release();
+    }
+  }
+);
+
+
+// ------------------------------------------------------
+// 啟用／停用管理員
+// PATCH /api/admin/admins/:id/status
+// ------------------------------------------------------
+app.patch(
+  "/api/admin/admins/:id/status",
+  authenticateAdmin,
+  requireSuperAdmin,
+  async (req, res) => {
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      const adminId = Number(req.params.id);
+      const isActive = req.body.is_active;
+
+      if (!Number.isInteger(adminId) || adminId <= 0) {
+        await client.query("ROLLBACK");
+
+        return res.status(400).json({
+          success: false,
+          message: "管理員編號錯誤"
+        });
+      }
+
+      if (typeof isActive !== "boolean") {
+        await client.query("ROLLBACK");
+
+        return res.status(400).json({
+          success: false,
+          message: "管理員狀態格式錯誤"
+        });
+      }
+
+      // req.admin.id 必須是 JWT 內保存的管理員 id
+      if (Number(req.admin.id) === adminId && isActive === false) {
+        await client.query("ROLLBACK");
+
+        return res.status(400).json({
+          success: false,
+          message: "不能停用目前登入中的管理員帳號"
+        });
+      }
+
+      const targetResult = await client.query(
+        `
+        SELECT id, username, role, is_active
+        FROM admins
+        WHERE id = $1
+        FOR UPDATE
+        `,
+        [adminId]
+      );
+
+      if (targetResult.rowCount === 0) {
+        await client.query("ROLLBACK");
+
+        return res.status(404).json({
+          success: false,
+          message: "找不到這位管理員"
+        });
+      }
+
+      const targetAdmin = targetResult.rows[0];
+
+      if (
+        targetAdmin.role === "super_admin" &&
+        targetAdmin.is_active === true &&
+        isActive === false
+      ) {
+        const countResult = await client.query(`
+          SELECT COUNT(*)::int AS count
+          FROM admins
+          WHERE role = 'super_admin'
+            AND is_active = true
+        `);
+
+        if (countResult.rows[0].count <= 1) {
+          await client.query("ROLLBACK");
+
+          return res.status(400).json({
+            success: false,
+            message: "不能停用最後一位超級管理員"
+          });
+        }
+      }
+
+      const result = await client.query(
+        `
+        UPDATE admins
+        SET
+          is_active = $1,
+          updated_at = NOW()
+        WHERE id = $2
+        RETURNING
+          id,
+          username,
+          display_name,
+          role,
+          is_active,
+          created_at,
+          updated_at
+        `,
+        [
+          isActive,
+          adminId
+        ]
+      );
+
+      await client.query("COMMIT");
+
+      return res.json({
+        success: true,
+        message: isActive
+          ? "管理員已啟用"
+          : "管理員已停用",
+        admin: result.rows[0]
+      });
+    } catch (error) {
+      await client.query("ROLLBACK");
+
+      console.error("修改管理員狀態失敗：", error);
+
+      return res.status(500).json({
+        success: false,
+        message: "修改管理員狀態失敗"
+      });
+    } finally {
+      client.release();
+    }
+  }
+);
 
 // ==============================
 // API 找不到時回傳 JSON
@@ -902,6 +1362,12 @@ app.get("/admin-test", (req, res) => {
 // 進入 /admin 時跳到登入頁
 app.get("/admin", (req, res) => {
   return res.redirect("/admin/login.html");
+});
+
+app.get("/admin/admins", (req, res) => {
+  return res.sendFile(
+    path.join(__dirname, "admin", "admins.html")
+  );
 });
 
 // ==============================
