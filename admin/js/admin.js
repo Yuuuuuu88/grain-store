@@ -1,1085 +1,960 @@
-"use strict";
+const API_BASE = "/api/admin";
 
-document.addEventListener("DOMContentLoaded", () => {
-  // ==============================
-  // 取得 HTML 元素
-  // ==============================
+const token =
+  localStorage.getItem("adminToken") ||
+  sessionStorage.getItem("adminToken");
 
-  const adminsTableBody =
-    document.getElementById("adminsTableBody");
+const adminsTableBody =
+  document.getElementById("adminsTableBody");
 
-  const pageMessage =
-    document.getElementById("pageMessage");
+const pageMessage =
+  document.getElementById("pageMessage");
 
-  const addAdminButton =
-    document.getElementById("addAdminButton");
+const adminModal =
+  document.getElementById("adminModal");
 
-  const logoutButton =
-    document.getElementById("logoutButton");
+const adminForm =
+  document.getElementById("adminForm");
 
-  const adminModal =
-    document.getElementById("adminModal");
+const adminIdInput =
+  document.getElementById("adminId");
 
-  const closeModalButton =
-    document.getElementById("closeModalButton");
+const usernameInput =
+  document.getElementById("username");
 
-  const cancelButton =
-    document.getElementById("cancelButton");
+const displayNameInput =
+  document.getElementById("displayName");
 
-  const adminForm =
-    document.getElementById("adminForm");
+const roleInput =
+  document.getElementById("role");
 
-  const adminIdInput =
-    document.getElementById("adminId");
+const passwordInput =
+  document.getElementById("password");
 
-  const usernameInput =
-    document.getElementById("username");
+const passwordRequired =
+  document.getElementById("passwordRequired");
 
-  const displayNameInput =
-    document.getElementById("displayName");
+const passwordHelp =
+  document.getElementById("passwordHelp");
 
-  const roleInput =
-    document.getElementById("role");
+const modalTitle =
+  document.getElementById("modalTitle");
 
-  const passwordInput =
-    document.getElementById("password");
+const modalSubtitle =
+  document.getElementById("modalSubtitle");
 
-  const passwordLabel =
-    document.getElementById("passwordLabel");
+const modalMessage =
+  document.getElementById("modalMessage");
 
-  const passwordRequired =
-    document.getElementById("passwordRequired");
+const saveButton =
+  document.getElementById("saveButton");
 
-  const passwordHelp =
-    document.getElementById("passwordHelp");
+const addAdminButton =
+  document.getElementById("addAdminButton");
 
-  const modalTitle =
-    document.getElementById("modalTitle");
+const closeModalButton =
+  document.getElementById("closeModalButton");
 
-  const modalMessage =
-    document.getElementById("modalMessage");
+const cancelButton =
+  document.getElementById("cancelButton");
 
-  const saveButton =
-    document.getElementById("saveButton");
+const logoutButton =
+  document.getElementById("logoutButton");
 
-  // ==============================
-  // 資料狀態
-  // ==============================
+const mobileMenuButton =
+  document.getElementById("mobileMenuButton");
 
-  let admins = [];
-  let currentAdmin = null;
+const sidebarOverlay =
+  document.getElementById("sidebarOverlay");
 
-  // ==============================
-  // 檢查必要元素
-  // ==============================
+const adminName =
+  document.getElementById("adminName");
 
-  const requiredElements = {
-    adminsTableBody,
-    pageMessage,
-    addAdminButton,
-    logoutButton,
-    adminModal,
-    closeModalButton,
-    cancelButton,
-    adminForm,
-    adminIdInput,
-    usernameInput,
-    displayNameInput,
-    roleInput,
-    passwordInput,
-    passwordLabel,
-    passwordRequired,
-    passwordHelp,
-    modalTitle,
-    modalMessage,
-    saveButton
-  };
+const adminRole =
+  document.getElementById("adminRole");
 
-  for (const [name, element] of Object.entries(requiredElements)) {
-    if (!element) {
-      console.error(`找不到 HTML 元素：${name}`);
+const adminAvatar =
+  document.getElementById("adminAvatar");
+
+let currentAdmin = null;
+let admins = [];
+let isEditing = false;
+
+/* =========================================
+   基本工具
+========================================= */
+
+function redirectToLogin() {
+  localStorage.removeItem("adminToken");
+  sessionStorage.removeItem("adminToken");
+
+  window.location.href = "/admin/login.html";
+}
+
+function getHeaders(includeJson = false) {
+  const headers = {};
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  if (includeJson) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  return headers;
+}
+
+async function apiRequest(
+  url,
+  options = {}
+) {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      ...getHeaders(
+        options.body !== undefined
+      ),
+      ...(options.headers || {})
     }
+  });
+
+  let data = null;
+
+  try {
+    data = await response.json();
+  } catch (error) {
+    data = null;
   }
 
-  // ==============================
-  // Token
-  // ==============================
-
-  function getToken() {
-    return (
-      localStorage.getItem("adminToken") ||
-      localStorage.getItem("token") ||
-      sessionStorage.getItem("adminToken") ||
-      sessionStorage.getItem("token")
-    );
-  }
-
-  function clearToken() {
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("token");
-
-    sessionStorage.removeItem("adminToken");
-    sessionStorage.removeItem("token");
-  }
-
-  function redirectToLogin() {
-    clearToken();
-    window.location.href = "/admin/login.html";
-  }
-
-  // ==============================
-  // 訊息顯示
-  // ==============================
-
-  function showMessage(
-    element,
-    message,
-    type = "error"
+  if (
+    response.status === 401 ||
+    response.status === 403 &&
+      data?.message?.includes("登入")
   ) {
-    if (!element) {
-      return;
-    }
-
-    element.textContent = message;
-    element.className = `message show ${type}`;
+    redirectToLogin();
+    return null;
   }
 
-  function hideMessage(element) {
-    if (!element) {
-      return;
-    }
+  if (!response.ok) {
+    const error = new Error(
+      data?.message ||
+      data?.error ||
+      "操作失敗，請稍後再試。"
+    );
 
-    element.textContent = "";
-    element.className = "message";
+    error.status = response.status;
+    error.data = data;
+
+    throw error;
   }
 
-  // ==============================
-  // 基本工具
-  // ==============================
+  return data;
+}
 
-  function escapeHtml(value) {
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function formatDate(value) {
+  if (!value) {
+    return "—";
   }
 
-  function formatDate(value) {
-    if (!value) {
-      return "－";
-    }
+  const date = new Date(value);
 
-    const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
 
-    if (Number.isNaN(date.getTime())) {
-      return "－";
-    }
-
-    return new Intl.DateTimeFormat("zh-TW", {
+  return new Intl.DateTimeFormat(
+    "zh-TW",
+    {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
       hour12: false
-    }).format(date);
+    }
+  ).format(date);
+}
+
+function getRoleText(role) {
+  if (role === "owner") {
+    return "最高管理員";
   }
 
-  function getRoleName(role) {
-    if (role === "owner") {
-      return "最高管理員";
-    }
-
-    if (role === "manager") {
-      return "一般管理員";
-    }
-
-    return role || "未知權限";
+  if (role === "manager") {
+    return "一般管理員";
   }
 
-  function getRoleClass(role) {
-    if (role === "owner") {
-      return "role-owner";
-    }
+  return role || "—";
+}
 
-    return "role-manager";
+function getInitial(name) {
+  const value = String(name || "管").trim();
+
+  return value.charAt(0) || "管";
+}
+
+/* =========================================
+   訊息顯示
+========================================= */
+
+function showPageMessage(
+  message,
+  type = "error"
+) {
+  pageMessage.textContent = message;
+  pageMessage.className =
+    `page-message show ${type}`;
+
+  window.clearTimeout(
+    showPageMessage.timer
+  );
+
+  showPageMessage.timer =
+    window.setTimeout(() => {
+      hidePageMessage();
+    }, 5000);
+}
+
+function hidePageMessage() {
+  pageMessage.textContent = "";
+  pageMessage.className =
+    "page-message";
+}
+
+function showModalMessage(
+  message,
+  type = "error"
+) {
+  modalMessage.textContent = message;
+  modalMessage.className =
+    `modal-message show ${type}`;
+}
+
+function hideModalMessage() {
+  modalMessage.textContent = "";
+  modalMessage.className =
+    "modal-message";
+}
+
+/* =========================================
+   登入管理員資料
+========================================= */
+
+async function loadCurrentAdmin() {
+  const data = await apiRequest(
+    `${API_BASE}/me`
+  );
+
+  if (!data) {
+    return;
   }
 
-  // ==============================
-  // API 共用函式
-  // ==============================
+  currentAdmin =
+    data.admin ||
+    data.data ||
+    data;
 
-  async function apiRequest(
-    url,
-    options = {}
-  ) {
-    const token = getToken();
+  const displayName =
+    currentAdmin.display_name ||
+    currentAdmin.displayName ||
+    currentAdmin.username ||
+    "管理員";
 
-    if (!token) {
-      redirectToLogin();
-      throw new Error("尚未登入");
-    }
+  adminName.textContent = displayName;
+  adminRole.textContent =
+    getRoleText(currentAdmin.role);
 
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      ...(options.headers || {})
-    };
+  adminAvatar.textContent =
+    getInitial(displayName);
 
-    if (
-      options.body &&
-      !(options.body instanceof FormData)
-    ) {
-      headers["Content-Type"] = "application/json";
-    }
-
-    let response;
-
-    try {
-      response = await fetch(url, {
-        ...options,
-        headers
-      });
-    } catch (error) {
-      console.error("無法連線到伺服器：", error);
-
-      throw new Error(
-        "無法連線到伺服器，請確認後端是否已啟動"
-      );
-    }
-
-    let data;
-
-    try {
-      data = await response.json();
-    } catch (error) {
-      data = {
-        success: false,
-        message: "伺服器回傳格式錯誤"
-      };
-    }
-
-    if (response.status === 401) {
-      clearToken();
-
-      alert(
-        data.message ||
-        "登入已過期，請重新登入"
-      );
-
-      window.location.href =
-        "/admin/login.html";
-
-      throw new Error(
-        data.message ||
-        "登入已過期，請重新登入"
-      );
-    }
-
-    if (response.status === 403) {
-      throw new Error(
-        data.message ||
-        "你沒有執行此操作的權限"
-      );
-    }
-
-    if (!response.ok) {
-      throw new Error(
-        data.message ||
-        `請求失敗，狀態碼：${response.status}`
-      );
-    }
-
-    return data;
+  if (currentAdmin.role !== "owner") {
+    window.location.href =
+      "/admin/dashboard.html";
   }
+}
 
-  // ==============================
-  // 表格顯示
-  // ==============================
+/* =========================================
+   管理員列表
+========================================= */
 
-  function renderLoading() {
+async function loadAdmins() {
+  adminsTableBody.innerHTML = `
+    <tr>
+      <td colspan="6" class="empty-row">
+        載入中……
+      </td>
+    </tr>
+  `;
+
+  try {
+    const data = await apiRequest(
+      `${API_BASE}/admins`
+    );
+
+    admins = Array.isArray(data)
+      ? data
+      : data?.admins ||
+        data?.data ||
+        [];
+
+    renderAdmins();
+  } catch (error) {
+    admins = [];
+
     adminsTableBody.innerHTML = `
       <tr>
-        <td
-          class="empty-message"
-          colspan="6"
-        >
-          載入中……
+        <td colspan="6" class="empty-row">
+          無法載入管理員資料。
         </td>
       </tr>
     `;
-  }
 
-  function renderError(message) {
+    showPageMessage(error.message);
+  }
+}
+
+function renderAdmins() {
+  if (!admins.length) {
     adminsTableBody.innerHTML = `
       <tr>
-        <td
-          class="empty-message"
-          colspan="6"
-        >
-          ${escapeHtml(message)}
+        <td colspan="6" class="empty-row">
+          目前沒有管理員資料。
         </td>
       </tr>
     `;
+
+    return;
   }
 
-  function renderAdmins() {
-    if (!Array.isArray(admins) || admins.length === 0) {
-      adminsTableBody.innerHTML = `
+  adminsTableBody.innerHTML =
+    admins.map((admin) => {
+      const adminId =
+        Number(admin.id);
+
+      const currentAdminId =
+        Number(currentAdmin?.id);
+
+      const isCurrent =
+        adminId === currentAdminId;
+
+      const isActive =
+        admin.is_active === true ||
+        admin.is_active === "true" ||
+        admin.is_active === 1;
+
+      const roleClass =
+        admin.role === "owner"
+          ? "role-owner"
+          : "role-manager";
+
+      const statusClass =
+        isActive
+          ? "status-active"
+          : "status-inactive";
+
+      const statusText =
+        isActive ? "啟用中" : "已停用";
+
+      const toggleClass =
+        isActive
+          ? "disable-button"
+          : "enable-button";
+
+      const toggleText =
+        isActive ? "停用" : "啟用";
+
+      return `
         <tr>
-          <td
-            class="empty-message"
-            colspan="6"
-          >
-            目前沒有管理員資料
+          <td>
+            <span class="username-cell">
+              ${escapeHtml(admin.username)}
+            </span>
+
+            ${
+              isCurrent
+                ? `
+                  <span class="current-label">
+                    目前帳號
+                  </span>
+                `
+                : ""
+            }
+          </td>
+
+          <td>
+            ${escapeHtml(
+              admin.display_name || "—"
+            )}
+          </td>
+
+          <td>
+            <span
+              class="role-badge ${roleClass}"
+            >
+              ${escapeHtml(
+                getRoleText(admin.role)
+              )}
+            </span>
+          </td>
+
+          <td>
+            <span
+              class="status-badge ${statusClass}"
+            >
+              ${statusText}
+            </span>
+          </td>
+
+          <td>
+            ${escapeHtml(
+              formatDate(admin.created_at)
+            )}
+          </td>
+
+          <td>
+            <div class="actions">
+              <button
+                type="button"
+                class="table-button edit-button"
+                data-action="edit"
+                data-id="${adminId}"
+              >
+                編輯
+              </button>
+
+              <button
+                type="button"
+                class="table-button ${toggleClass}"
+                data-action="toggle"
+                data-id="${adminId}"
+                data-active="${isActive}"
+                ${isCurrent ? "disabled" : ""}
+                title="${
+                  isCurrent
+                    ? "不能停用目前登入的帳號"
+                    : ""
+                }"
+              >
+                ${toggleText}
+              </button>
+            </div>
           </td>
         </tr>
       `;
+    }).join("");
+}
 
-      return;
-    }
+/* =========================================
+   Modal
+========================================= */
 
-    adminsTableBody.innerHTML = admins
-      .map((admin) => {
-        const isCurrentAdmin =
-          currentAdmin &&
-          Number(currentAdmin.id) ===
-          Number(admin.id);
+function openCreateModal() {
+  isEditing = false;
 
-        const isActive =
-          admin.is_active === true;
+  adminForm.reset();
 
-        const statusText =
-          isActive
-            ? "啟用中"
-            : "已停用";
+  adminIdInput.value = "";
+  usernameInput.disabled = false;
+  passwordInput.required = true;
 
-        const statusClass =
-          isActive
-            ? "status-active"
-            : "status-inactive";
+  roleInput.value = "manager";
 
-        const statusButtonText =
-          isActive
-            ? "停用"
-            : "啟用";
+  modalTitle.textContent =
+    "新增管理員";
 
-        const statusButtonClass =
-          isActive
-            ? "btn-disable"
-            : "btn-enable";
+  modalSubtitle.textContent =
+    "建立新的後台管理員帳號。";
 
-        const disableCurrentButton =
-          isCurrentAdmin && isActive;
+  passwordRequired.classList.remove(
+    "hidden"
+  );
 
-        return `
-          <tr>
-            <td>
-              ${escapeHtml(admin.username)}
+  passwordHelp.textContent =
+    "新增管理員時必須輸入密碼，至少 6 個字元。";
 
-              ${
-                isCurrentAdmin
-                  ? "<strong>（目前登入）</strong>"
-                  : ""
-              }
-            </td>
+  saveButton.textContent =
+    "建立管理員";
 
-            <td>
-              ${escapeHtml(
-                admin.display_name || "－"
-              )}
-            </td>
+  hideModalMessage();
+  showModal();
 
-            <td>
-              <span
-                class="role-badge ${getRoleClass(admin.role)}"
-              >
-                ${escapeHtml(
-                  getRoleName(admin.role)
-                )}
-              </span>
-            </td>
+  window.setTimeout(() => {
+    usernameInput.focus();
+  }, 100);
+}
 
-            <td>
-              <span
-                class="status-badge ${statusClass}"
-              >
-                ${statusText}
-              </span>
-            </td>
+function openEditModal(admin) {
+  isEditing = true;
 
-            <td>
-              ${escapeHtml(
-                formatDate(admin.created_at)
-              )}
-            </td>
+  adminForm.reset();
 
-            <td>
-              <div class="actions">
-                <button
-                  class="btn btn-edit btn-small"
-                  type="button"
-                  data-action="edit"
-                  data-id="${admin.id}"
-                >
-                  編輯
-                </button>
+  adminIdInput.value = admin.id;
+  usernameInput.value =
+    admin.username || "";
 
-                <button
-                  class="btn ${statusButtonClass} btn-small"
-                  type="button"
-                  data-action="status"
-                  data-id="${admin.id}"
-                  data-active="${isActive}"
-                  ${
-                    disableCurrentButton
-                      ? "disabled"
-                      : ""
-                  }
-                >
-                  ${statusButtonText}
-                </button>
-              </div>
-            </td>
-          </tr>
-        `;
-      })
-      .join("");
-  }
+  displayNameInput.value =
+    admin.display_name || "";
 
-  // ==============================
-  // 取得目前登入管理員
-  // ==============================
+  roleInput.value =
+    admin.role || "manager";
 
-  async function loadCurrentAdmin() {
-    const data = await apiRequest(
-      "/api/admin/me"
-    );
+  passwordInput.value = "";
+  passwordInput.required = false;
 
-    currentAdmin = data.admin;
+  usernameInput.disabled = true;
 
-    if (!currentAdmin) {
+  modalTitle.textContent =
+    "編輯管理員";
+
+  modalSubtitle.textContent =
+    `修改「${admin.username}」的名稱、權限或密碼。`;
+
+  passwordRequired.classList.add(
+    "hidden"
+  );
+
+  passwordHelp.textContent =
+    "不修改密碼時請保持空白；輸入新密碼則至少 6 個字元。";
+
+  saveButton.textContent =
+    "儲存修改";
+
+  hideModalMessage();
+  showModal();
+
+  window.setTimeout(() => {
+    displayNameInput.focus();
+  }, 100);
+}
+
+function showModal() {
+  adminModal.classList.add("show");
+  adminModal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  document.body.classList.add(
+    "modal-open"
+  );
+}
+
+function closeModal() {
+  adminModal.classList.remove("show");
+  adminModal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  document.body.classList.remove(
+    "modal-open"
+  );
+
+  adminForm.reset();
+  adminIdInput.value = "";
+  usernameInput.disabled = false;
+
+  hideModalMessage();
+
+  isEditing = false;
+}
+
+/* =========================================
+   新增與編輯
+========================================= */
+
+function validateForm() {
+  const username =
+    usernameInput.value.trim();
+
+  const displayName =
+    displayNameInput.value.trim();
+
+  const password =
+    passwordInput.value;
+
+  if (!isEditing) {
+    const usernamePattern =
+      /^[A-Za-z0-9_]+$/;
+
+    if (username.length < 3) {
       throw new Error(
-        "無法取得目前登入管理員資料"
+        "管理員帳號至少需要 3 個字元。"
       );
     }
 
-    if (currentAdmin.role !== "owner") {
+    if (!usernamePattern.test(username)) {
       throw new Error(
-        "只有最高管理員可以使用管理員管理功能"
+        "管理員帳號只能包含英文字母、數字及底線。"
       );
     }
   }
 
-  // ==============================
-  // 取得管理員列表
-  // ==============================
-
-  async function loadAdmins() {
-    renderLoading();
-    hideMessage(pageMessage);
-
-    try {
-      const data = await apiRequest(
-        "/api/admin/admins"
-      );
-
-      admins = Array.isArray(data.admins)
-        ? data.admins
-        : [];
-
-      renderAdmins();
-    } catch (error) {
-      console.error(
-        "載入管理員列表失敗：",
-        error
-      );
-
-      renderError(
-        error.message ||
-        "載入管理員列表失敗"
-      );
-
-      showMessage(
-        pageMessage,
-        error.message ||
-        "載入管理員列表失敗",
-        "error"
-      );
-    }
-  }
-
-  // ==============================
-  // 重設表單
-  // ==============================
-
-  function resetForm() {
-    adminForm.reset();
-
-    adminIdInput.value = "";
-    usernameInput.value = "";
-    displayNameInput.value = "";
-    roleInput.value = "manager";
-    passwordInput.value = "";
-
-    usernameInput.disabled = false;
-    passwordInput.required = true;
-
-    passwordLabel.textContent = "密碼";
-    passwordRequired.style.display =
-      "inline";
-
-    passwordHelp.textContent =
-      "密碼至少需要 6 個字元。";
-
-    modalTitle.textContent =
-      "新增管理員";
-
-    saveButton.textContent =
-      "儲存";
-
-    saveButton.disabled = false;
-
-    hideMessage(modalMessage);
-  }
-
-  // ==============================
-  // 開啟新增視窗
-  // ==============================
-
-  function openAddModal() {
-    resetForm();
-
-    adminModal.classList.add("show");
-
-    setTimeout(() => {
-      usernameInput.focus();
-    }, 0);
-  }
-
-  // ==============================
-  // 開啟編輯視窗
-  // ==============================
-
-  function openEditModal(adminId) {
-    const admin = admins.find(
-      (item) =>
-        Number(item.id) ===
-        Number(adminId)
-    );
-
-    if (!admin) {
-      showMessage(
-        pageMessage,
-        "找不到這位管理員",
-        "error"
-      );
-
-      return;
-    }
-
-    resetForm();
-
-    adminIdInput.value = admin.id;
-
-    usernameInput.value =
-      admin.username || "";
-
-    displayNameInput.value =
-      admin.display_name || "";
-
-    roleInput.value =
-      admin.role === "owner"
-        ? "owner"
-        : "manager";
-
-    passwordInput.value = "";
-
-    usernameInput.disabled = true;
-    passwordInput.required = false;
-
-    passwordLabel.textContent =
-      "新密碼";
-
-    passwordRequired.style.display =
-      "none";
-
-    passwordHelp.textContent =
-      "如果不需要修改密碼，請保持空白。";
-
-    modalTitle.textContent =
-      "編輯管理員";
-
-    saveButton.textContent =
-      "儲存修改";
-
-    adminModal.classList.add("show");
-
-    setTimeout(() => {
-      displayNameInput.focus();
-    }, 0);
-  }
-
-  // ==============================
-  // 關閉視窗
-  // ==============================
-
-  function closeModal() {
-    adminModal.classList.remove("show");
-    resetForm();
-  }
-
-  // ==============================
-  // 新增管理員
-  // ==============================
-
-  async function createAdmin(formData) {
-    return apiRequest(
-      "/api/admin/admins",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-          display_name:
-            formData.display_name,
-          role: formData.role
-        })
-      }
+  if (!displayName) {
+    throw new Error(
+      "請輸入顯示名稱。"
     );
   }
 
-  // ==============================
-  // 修改管理員
-  // ==============================
+  if (!isEditing && password.length < 6) {
+    throw new Error(
+      "登入密碼至少需要 6 個字元。"
+    );
+  }
 
-  async function updateAdmin(
-    adminId,
-    formData
+  if (
+    isEditing &&
+    password &&
+    password.length < 6
   ) {
-    return apiRequest(
-      `/api/admin/admins/${adminId}`,
-      {
-        method: "PUT",
-        body: JSON.stringify({
-          display_name:
-            formData.display_name,
-          role: formData.role,
-          password: formData.password
-        })
-      }
+    throw new Error(
+      "新密碼至少需要 6 個字元。"
     );
   }
+}
 
-  // ==============================
-  // 提交新增／修改表單
-  // ==============================
+async function handleFormSubmit(event) {
+  event.preventDefault();
 
-  async function handleSubmit(event) {
-    event.preventDefault();
+  hideModalMessage();
 
-    hideMessage(modalMessage);
-
-    const adminId =
-      adminIdInput.value.trim();
-
-    const username =
-      usernameInput.value.trim();
-
-    const displayName =
-      displayNameInput.value.trim();
-
-    const role =
-      roleInput.value;
-
-    const password =
-      passwordInput.value;
-
-    // 顯示名稱
-    if (!displayName) {
-      showMessage(
-        modalMessage,
-        "請輸入顯示名稱",
-        "error"
-      );
-
-      return;
-    }
-
-    // 權限
-    if (
-      role !== "manager" &&
-      role !== "owner"
-    ) {
-      showMessage(
-        modalMessage,
-        "管理員權限格式錯誤",
-        "error"
-      );
-
-      return;
-    }
-
-    // 新增模式
-    if (!adminId) {
-      if (!username) {
-        showMessage(
-          modalMessage,
-          "請輸入帳號",
-          "error"
-        );
-
-        return;
-      }
-
-      if (
-        username.length < 3 ||
-        username.length > 50
-      ) {
-        showMessage(
-          modalMessage,
-          "帳號長度必須為 3～50 個字元",
-          "error"
-        );
-
-        return;
-      }
-
-      if (
-        !/^[a-zA-Z0-9_]+$/.test(username)
-      ) {
-        showMessage(
-          modalMessage,
-          "帳號只能使用英文字母、數字與底線",
-          "error"
-        );
-
-        return;
-      }
-
-      if (password.length < 6) {
-        showMessage(
-          modalMessage,
-          "密碼至少需要 6 個字元",
-          "error"
-        );
-
-        return;
-      }
-    }
-
-    // 編輯模式，有填密碼才檢查
-    if (
-      adminId &&
-      password &&
-      password.length < 6
-    ) {
-      showMessage(
-        modalMessage,
-        "新密碼至少需要 6 個字元",
-        "error"
-      );
-
-      return;
-    }
+  try {
+    validateForm();
 
     saveButton.disabled = true;
     saveButton.textContent =
-      adminId
+      isEditing
         ? "儲存中……"
-        : "新增中……";
+        : "建立中……";
 
-    try {
-      let data;
+    if (isEditing) {
+      await updateAdmin();
+    } else {
+      await createAdmin();
+    }
 
-      if (adminId) {
-        data = await updateAdmin(
-          adminId,
-          {
-            display_name: displayName,
-            role,
-            password
-          }
-        );
-      } else {
-        data = await createAdmin({
-          username,
-          password,
-          display_name: displayName,
-          role
-        });
+    closeModal();
+    await loadAdmins();
+
+    showPageMessage(
+      isEditing
+        ? "管理員資料已更新。"
+        : "管理員帳號已建立。",
+      "success"
+    );
+  } catch (error) {
+    showModalMessage(error.message);
+  } finally {
+    saveButton.disabled = false;
+
+    saveButton.textContent =
+      isEditing
+        ? "儲存修改"
+        : "建立管理員";
+  }
+}
+
+async function createAdmin() {
+  const payload = {
+    username:
+      usernameInput.value.trim(),
+
+    display_name:
+      displayNameInput.value.trim(),
+
+    role:
+      roleInput.value,
+
+    password:
+      passwordInput.value
+  };
+
+  await apiRequest(
+    `${API_BASE}/admins`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload)
+    }
+  );
+}
+
+async function updateAdmin() {
+  const id =
+    adminIdInput.value;
+
+  const payload = {
+    display_name:
+      displayNameInput.value.trim(),
+
+    role:
+      roleInput.value
+  };
+
+  const password =
+    passwordInput.value;
+
+  if (password) {
+    payload.password = password;
+  }
+
+  await apiRequest(
+    `${API_BASE}/admins/${id}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload)
+    }
+  );
+}
+
+/* =========================================
+   啟用與停用
+========================================= */
+
+async function toggleAdminStatus(
+  admin,
+  button
+) {
+  const isActive =
+    admin.is_active === true ||
+    admin.is_active === "true" ||
+    admin.is_active === 1;
+
+  const nextStatus =
+    !isActive;
+
+  const actionText =
+    nextStatus ? "啟用" : "停用";
+
+  const confirmed =
+    window.confirm(
+      `確定要${actionText}管理員「${admin.username}」嗎？`
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    button.disabled = true;
+    button.textContent =
+      `${actionText}中……`;
+
+    await apiRequest(
+      `${API_BASE}/admins/${admin.id}/status`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({
+          is_active: nextStatus
+        })
       }
+    );
 
-      closeModal();
+    await loadAdmins();
 
-      showMessage(
-        pageMessage,
-        data.message ||
-        (adminId
-          ? "管理員資料修改成功"
-          : "管理員新增成功"),
-        "success"
-      );
+    showPageMessage(
+      `管理員「${admin.username}」已${actionText}。`,
+      "success"
+    );
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = actionText;
 
-      await loadCurrentAdmin();
-      await loadAdmins();
-    } catch (error) {
-      console.error(
-        "儲存管理員失敗：",
-        error
-      );
+    showPageMessage(error.message);
+  }
+}
 
-      showMessage(
-        modalMessage,
-        error.message ||
-        "儲存管理員失敗",
-        "error"
-      );
-    } finally {
-      saveButton.disabled = false;
+/* =========================================
+   表格操作
+========================================= */
 
-      saveButton.textContent =
-        adminId
-          ? "儲存修改"
-          : "儲存";
-    }
+function handleTableClick(event) {
+  const button =
+    event.target.closest(
+      "[data-action]"
+    );
+
+  if (!button) {
+    return;
   }
 
-  // ==============================
-  // 啟用／停用管理員
-  // ==============================
+  const adminId =
+    Number(button.dataset.id);
 
-  async function toggleAdminStatus(
-    adminId,
-    currentStatus
-  ) {
-    const targetAdmin = admins.find(
+  const admin =
+    admins.find(
       (item) =>
-        Number(item.id) ===
-        Number(adminId)
+        Number(item.id) === adminId
     );
 
-    if (!targetAdmin) {
-      showMessage(
-        pageMessage,
-        "找不到這位管理員",
-        "error"
-      );
-
-      return;
-    }
-
-    const nextStatus = !currentStatus;
-
-    const actionText =
-      nextStatus
-        ? "啟用"
-        : "停用";
-
-    const confirmed = window.confirm(
-      `確定要${actionText}管理員「${targetAdmin.username}」嗎？`
+  if (!admin) {
+    showPageMessage(
+      "找不到指定的管理員資料。"
     );
 
-    if (!confirmed) {
-      return;
-    }
-
-    hideMessage(pageMessage);
-
-    try {
-      const data = await apiRequest(
-        `/api/admin/admins/${adminId}/status`,
-        {
-          method: "PATCH",
-          body: JSON.stringify({
-            is_active: nextStatus
-          })
-        }
-      );
-
-      showMessage(
-        pageMessage,
-        data.message ||
-        `管理員已${actionText}`,
-        "success"
-      );
-
-      await loadAdmins();
-    } catch (error) {
-      console.error(
-        "修改管理員狀態失敗：",
-        error
-      );
-
-      showMessage(
-        pageMessage,
-        error.message ||
-        "修改管理員狀態失敗",
-        "error"
-      );
-    }
+    return;
   }
 
-  // ==============================
-  // 表格按鈕事件
-  // ==============================
+  const action =
+    button.dataset.action;
 
-  function handleTableClick(event) {
-    const button =
-      event.target.closest(
-        "button[data-action]"
-      );
+  if (action === "edit") {
+    openEditModal(admin);
+    return;
+  }
 
-    if (!button) {
-      return;
+  if (action === "toggle") {
+    toggleAdminStatus(
+      admin,
+      button
+    );
+  }
+}
+
+/* =========================================
+   側邊欄
+========================================= */
+
+function openSidebar() {
+  document.body.classList.add(
+    "sidebar-open"
+  );
+}
+
+function closeSidebar() {
+  document.body.classList.remove(
+    "sidebar-open"
+  );
+}
+
+function toggleSidebar() {
+  document.body.classList.toggle(
+    "sidebar-open"
+  );
+}
+
+/* =========================================
+   登出
+========================================= */
+
+function logout() {
+  const confirmed =
+    window.confirm("確定要登出嗎？");
+
+  if (!confirmed) {
+    return;
+  }
+
+  redirectToLogin();
+}
+
+/* =========================================
+   事件監聽
+========================================= */
+
+addAdminButton.addEventListener(
+  "click",
+  openCreateModal
+);
+
+closeModalButton.addEventListener(
+  "click",
+  closeModal
+);
+
+cancelButton.addEventListener(
+  "click",
+  closeModal
+);
+
+adminForm.addEventListener(
+  "submit",
+  handleFormSubmit
+);
+
+adminsTableBody.addEventListener(
+  "click",
+  handleTableClick
+);
+
+logoutButton.addEventListener(
+  "click",
+  logout
+);
+
+mobileMenuButton.addEventListener(
+  "click",
+  toggleSidebar
+);
+
+sidebarOverlay.addEventListener(
+  "click",
+  closeSidebar
+);
+
+adminModal.addEventListener(
+  "click",
+  (event) => {
+    if (event.target === adminModal) {
+      closeModal();
     }
+  }
+);
 
-    const action =
-      button.dataset.action;
+document.addEventListener(
+  "keydown",
+  (event) => {
+    if (
+      event.key === "Escape" &&
+      adminModal.classList.contains("show")
+    ) {
+      closeModal();
+    }
+  }
+);
 
-    const adminId =
-      Number(button.dataset.id);
+window.addEventListener(
+  "resize",
+  () => {
+    if (window.innerWidth > 760) {
+      closeSidebar();
+    }
+  }
+);
+
+/* =========================================
+   初始化
+========================================= */
+
+async function initializePage() {
+  if (!token) {
+    redirectToLogin();
+    return;
+  }
+
+  try {
+    await loadCurrentAdmin();
 
     if (
-      !Number.isInteger(adminId) ||
-      adminId <= 0
+      !currentAdmin ||
+      currentAdmin.role !== "owner"
     ) {
-      showMessage(
-        pageMessage,
-        "管理員編號錯誤",
-        "error"
-      );
-
       return;
     }
 
-    if (action === "edit") {
-      openEditModal(adminId);
-      return;
-    }
-
-    if (action === "status") {
-      const currentStatus =
-        button.dataset.active === "true";
-
-      toggleAdminStatus(
-        adminId,
-        currentStatus
-      );
-    }
+    await loadAdmins();
+  } catch (error) {
+    showPageMessage(error.message);
   }
+}
 
-  // ==============================
-  // 登出
-  // ==============================
-
-  function logout() {
-    const confirmed =
-      window.confirm("確定要登出嗎？");
-
-    if (!confirmed) {
-      return;
-    }
-
-    clearToken();
-
-    window.location.href =
-      "/admin/login.html";
-  }
-
-  // ==============================
-  // 綁定事件
-  // ==============================
-
-  addAdminButton.addEventListener(
-    "click",
-    openAddModal
-  );
-
-  closeModalButton.addEventListener(
-    "click",
-    closeModal
-  );
-
-  cancelButton.addEventListener(
-    "click",
-    closeModal
-  );
-
-  logoutButton.addEventListener(
-    "click",
-    logout
-  );
-
-  adminForm.addEventListener(
-    "submit",
-    handleSubmit
-  );
-
-  adminsTableBody.addEventListener(
-    "click",
-    handleTableClick
-  );
-
-  adminModal.addEventListener(
-    "click",
-    (event) => {
-      if (event.target === adminModal) {
-        closeModal();
-      }
-    }
-  );
-
-  document.addEventListener(
-    "keydown",
-    (event) => {
-      if (
-        event.key === "Escape" &&
-        adminModal.classList.contains("show")
-      ) {
-        closeModal();
-      }
-    }
-  );
-
-  // ==============================
-  // 頁面初始化
-  // ==============================
-
-  async function initializePage() {
-    renderLoading();
-    hideMessage(pageMessage);
-
-    const token = getToken();
-
-    if (!token) {
-      redirectToLogin();
-      return;
-    }
-
-    try {
-      await loadCurrentAdmin();
-      await loadAdmins();
-    } catch (error) {
-      console.error(
-        "初始化管理員頁面失敗：",
-        error
-      );
-
-      renderError(
-        error.message ||
-        "管理員頁面載入失敗"
-      );
-
-      showMessage(
-        pageMessage,
-        error.message ||
-        "管理員頁面載入失敗",
-        "error"
-      );
-    }
-  }
-
-  initializePage();
-});
+initializePage();
