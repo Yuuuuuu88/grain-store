@@ -35,6 +35,11 @@
       cursor: pointer;
     }
 
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
     .page {
       min-height: 100vh;
     }
@@ -107,12 +112,14 @@
       border: 0;
       border-radius: 10px;
 
+      text-decoration: none;
+
       transition:
         opacity 0.2s,
         transform 0.2s;
     }
 
-    .btn:hover {
+    .btn:hover:not(:disabled) {
       opacity: 0.88;
       transform: translateY(-1px);
     }
@@ -154,8 +161,8 @@
 
     table {
       width: 100%;
-      border-collapse: collapse;
       min-width: 800px;
+      border-collapse: collapse;
     }
 
     th,
@@ -199,12 +206,12 @@
       background: #fae7e7;
     }
 
-    .role-super {
+    .role-owner {
       color: #6d471c;
       background: #f7ead6;
     }
 
-    .role-admin {
+    .role-manager {
       color: #3c526d;
       background: #e7eef7;
     }
@@ -226,6 +233,7 @@
       margin-bottom: 16px;
       padding: 12px 15px;
       border-radius: 10px;
+      line-height: 1.5;
     }
 
     .message.show {
@@ -475,7 +483,6 @@
     </main>
   </div>
 
-  <!-- 新增／編輯管理員視窗 -->
   <div
     class="modal"
     id="adminModal"
@@ -549,12 +556,12 @@
             name="role"
             required
           >
-            <option value="admin">
+            <option value="manager">
               一般管理員
             </option>
 
-            <option value="super_admin">
-              超級管理員
+            <option value="owner">
+              最高管理員
             </option>
           </select>
         </div>
@@ -562,6 +569,7 @@
         <div class="form-group">
           <label for="password">
             <span id="passwordLabel">密碼</span>
+
             <span
               class="required"
               id="passwordRequired"
