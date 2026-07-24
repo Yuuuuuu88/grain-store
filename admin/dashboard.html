@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+
+    <title>後台首頁｜國宏蛋行</title>
+
+    <link
+      rel="stylesheet"
+      href="/admin/css/admin.css"
+    />
+  </head>
+
+  <body>
+    <div class="admin-layout">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-logo">🥚</div>
+
+          <div>
+            <div class="brand-title">國宏蛋行</div>
+            <div class="brand-subtitle">後台管理系統</div>
+          </div>
+        </div>
+
+        <nav class="sidebar-menu">
+          <div class="menu-label">主要功能</div>
+
+          <a
+            href="/admin/dashboard.html"
+            class="menu-item active"
+          >
+            <span class="menu-icon">🏠</span>
+            <span class="menu-text">Dashboard</span>
+          </a>
+
+          <a
+            href="/admin/products.html"
+            class="menu-item"
+          >
+            <span class="menu-icon">📦</span>
+            <span class="menu-text">商品管理</span>
+          </a>
+
+          <a
+            href="/admin/product-form.html"
+            class="menu-item"
+          >
+            <span class="menu-icon">➕</span>
+            <span class="menu-text">新增商品</span>
+          </a>
+
+          <a
+            href="/admin/admins.html"
+            class="menu-item owner-only"
+          >
+            <span class="menu-icon">👥</span>
+            <span class="menu-text">管理員管理</span>
+          </a>
+
+          <a
+            href="/admin/logs.html"
+            class="menu-item"
+          >
+            <span class="menu-icon">📝</span>
+            <span class="menu-text">操作紀錄</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <button
+            id="logoutButton"
+            class="logout-button"
+            type="button"
+          >
+            <span class="menu-icon">🚪</span>
+            <span class="menu-text">登出</span>
+          </button>
+        </div>
+      </aside>
+
+      <div
+        id="sidebarOverlay"
+        class="sidebar-overlay"
+      ></div>
+
+      <main class="main-area">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button
+              id="mobileMenuButton"
+              class="mobile-menu-button"
+              type="button"
+              aria-label="開啟選單"
+            >
+              ☰
+            </button>
+
+            <div class="page-heading">
+              <h1>Dashboard</h1>
+              <p>查看商品、庫存與管理員的整體狀況</p>
+            </div>
+          </div>
+
+          <div class="admin-profile">
+            <div class="profile-text">
+              <div
+                id="headerAdminName"
+                class="profile-name"
+              >
+                載入中
+              </div>
+
+              <div
+                id="headerAdminRole"
+                class="profile-role"
+              >
+                —
+              </div>
+            </div>
+
+            <div
+              id="profileAvatar"
+              class="profile-avatar"
+            >
+              管
+            </div>
+          </div>
+        </header>
+
+        <section class="content">
+          <section class="welcome-panel">
+            <div class="welcome-content">
+              <div class="welcome-label">WELCOME BACK</div>
+
+              <h2>
+                歡迎回來，
+                <span id="welcomeAdminName">管理員</span>
+              </h2>
+
+              <p>
+                這裡可以查看國宏蛋行目前的商品、庫存和後台帳號統計。
+              </p>
+            </div>
+
+            <div class="welcome-decoration">🥚</div>
+          </section>
+
+          <section class="stats-grid">
+            <article class="stat-card">
+              <div class="stat-card-top">
+                <div class="stat-label">商品總數</div>
+                <div class="stat-icon products">📦</div>
+              </div>
+
+              <div>
+                <div
+                  id="totalProducts"
+                  class="stat-value"
+                >
+                  <span class="loading-skeleton"></span>
+                </div>
+
+                <div class="stat-description">
+                  資料庫內建立的所有商品
+                </div>
+              </div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-card-top">
+                <div class="stat-label">上架商品</div>
+                <div class="stat-icon available">✓</div>
+              </div>
+
+              <div>
+                <div
+                  id="availableProducts"
+                  class="stat-value"
+                >
+                  <span class="loading-skeleton"></span>
+                </div>
+
+                <div class="stat-description">
+                  目前可在前台顯示的商品
+                </div>
+              </div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-card-top">
+                <div class="stat-label">下架商品</div>
+                <div class="stat-icon unavailable">—</div>
+              </div>
+
+              <div>
+                <div
+                  id="unavailableProducts"
+                  class="stat-value"
+                >
+                  <span class="loading-skeleton"></span>
+                </div>
+
+                <div class="stat-description">
+                  目前未在前台顯示的商品
+                </div>
+              </div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-card-top">
+                <div class="stat-label">低庫存商品</div>
+                <div class="stat-icon low-stock">!</div>
+              </div>
+
+              <div>
+                <div
+                  id="lowStockProducts"
+                  class="stat-value"
+                >
+                  <span class="loading-skeleton"></span>
+                </div>
+
+                <div class="stat-description">
+                  庫存數量小於或等於 10
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <section class="dashboard-grid">
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-title">快速功能</div>
+                  <div class="panel-subtitle">
+                    快速前往常用的後台功能
+                  </div>
+                </div>
+              </div>
+
+              <div class="quick-actions">
+                <a
+                  href="/admin/products.html"
+                  class="quick-action"
+                >
+                  <div class="quick-action-icon">📦</div>
+
+                  <div>
+                    <div class="quick-action-title">管理商品</div>
+                    <div class="quick-action-text">
+                      查看、搜尋、編輯與上下架商品
+                    </div>
+                  </div>
+                </a>
+
+                <a
+                  href="/admin/product-form.html"
+                  class="quick-action"
+                >
+                  <div class="quick-action-icon">➕</div>
+
+                  <div>
+                    <div class="quick-action-title">新增商品</div>
+                    <div class="quick-action-text">
+                      建立新的商品資料與庫存資訊
+                    </div>
+                  </div>
+                </a>
+
+                <a
+                  href="/admin/admins.html"
+                  class="quick-action owner-only"
+                >
+                  <div class="quick-action-icon">👥</div>
+
+                  <div>
+                    <div class="quick-action-title">管理員管理</div>
+                    <div class="quick-action-text">
+                      管理後台帳號及角色權限
+                    </div>
+                  </div>
+                </a>
+
+                <a
+                  href="/admin/logs.html"
+                  class="quick-action"
+                >
+                  <div class="quick-action-icon">📝</div>
+
+                  <div>
+                    <div class="quick-action-title">操作紀錄</div>
+                    <div class="quick-action-text">
+                      查看管理員近期的重要操作
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-title">系統狀態</div>
+                  <div class="panel-subtitle">
+                    目前後台與帳號資訊
+                  </div>
+                </div>
+              </div>
+
+              <div class="system-info">
+                <div class="info-row">
+                  <div class="info-label">系統狀態</div>
+                  <div class="info-value">
+                    <span class="status-dot"></span>
+                    正常運作
+                  </div>
+                </div>
+
+                <div class="info-row">
+                  <div class="info-label">登入帳號</div>
+                  <div
+                    id="systemUsername"
+                    class="info-value"
+                  >
+                    —
+                  </div>
+                </div>
+
+                <div class="info-row">
+                  <div class="info-label">目前權限</div>
+                  <div
+                    id="systemRole"
+                    class="info-value"
+                  >
+                    —
+                  </div>
+                </div>
+
+                <div class="info-row">
+                  <div class="info-label">啟用管理員</div>
+                  <div
+                    id="activeAdmins"
+                    class="info-value"
+                  >
+                    —
+                  </div>
+                </div>
+
+                <div class="info-row">
+                  <div class="info-label">缺貨商品</div>
+                  <div
+                    id="outOfStockProducts"
+                    class="info-value"
+                  >
+                    —
+                  </div>
+                </div>
+              </div>
+            </article>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="/admin/js/dashboard.js"></script>
+  </body>
+</html>

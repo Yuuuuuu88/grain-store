@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>國宏蛋行｜管理員登入</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family:
+        "Microsoft JhengHei",
+        "Noto Sans TC",
+        Arial,
+        sans-serif;
+      background:
+        radial-gradient(
+          circle at top right,
+          rgba(255, 197, 112, 0.35),
+          transparent 36%
+        ),
+        linear-gradient(
+          135deg,
+          #f7f1e8,
+          #eadccb
+        );
+      color: #2f2924;
+    }
+
+    .login-page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+    }
+
+    .brand-section {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      padding: 70px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(63, 47, 35, 0.97),
+          rgba(108, 70, 39, 0.94)
+        );
+      color: white;
+    }
+
+    .brand-section::before {
+      content: "";
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      top: -150px;
+      right: -100px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .brand-section::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      bottom: -120px;
+      left: -80px;
+      border-radius: 50%;
+      background: rgba(255, 194, 101, 0.1);
+    }
+
+    .brand-content {
+      position: relative;
+      z-index: 2;
+      max-width: 560px;
+    }
+
+    .brand-logo {
+      width: 82px;
+      height: 82px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 30px;
+      border-radius: 24px;
+      background:
+        linear-gradient(
+          135deg,
+          #ffd18a,
+          #d8913f
+        );
+      font-size: 42px;
+      box-shadow:
+        0 18px 38px rgba(0, 0, 0, 0.25);
+    }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: #efc98d;
+    }
+
+    .brand-title {
+      margin-top: 14px;
+      font-size: 48px;
+      line-height: 1.28;
+      font-weight: 900;
+    }
+
+    .brand-description {
+      margin-top: 22px;
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 16px;
+      line-height: 1.9;
+    }
+
+    .brand-features {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 34px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 15px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 14px;
+    }
+
+    .feature-icon {
+      font-size: 20px;
+    }
+
+    .login-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 45px;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .mobile-brand {
+      display: none;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    .mobile-logo {
+      width: 68px;
+      height: 68px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 12px;
+      border-radius: 20px;
+      background:
+        linear-gradient(
+          135deg,
+          #f7c16f,
+          #c77d2b
+        );
+      font-size: 34px;
+      box-shadow:
+        0 12px 26px rgba(154, 92, 33, 0.22);
+    }
+
+    .mobile-brand-title {
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .mobile-brand-subtitle {
+      margin-top: 5px;
+      color: #8b8178;
+      font-size: 13px;
+    }
+
+    .login-card {
+      padding: 38px;
+      border: 1px solid rgba(117, 91, 67, 0.12);
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow:
+        0 24px 60px rgba(86, 62, 42, 0.14);
+      backdrop-filter: blur(18px);
+    }
+
+    .login-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: #f7ead9;
+      color: #aa682b;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .login-card h1 {
+      margin-top: 18px;
+      font-size: 34px;
+      line-height: 1.25;
+    }
+
+    .login-description {
+      margin-top: 10px;
+      color: #847a71;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .login-form {
+      margin-top: 28px;
+    }
+
+    .form-group {
+      margin-bottom: 19px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 9px;
+      color: #4b423a;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      top: 50%;
+      left: 15px;
+      transform: translateY(-50%);
+      color: #a09184;
+      font-size: 18px;
+      pointer-events: none;
+    }
+
+    .form-input {
+      width: 100%;
+      height: 52px;
+      padding: 0 48px 0 46px;
+      border: 1px solid #ddd3c8;
+      border-radius: 14px;
+      outline: none;
+      background: #fffdfb;
+      color: #2f2924;
+      font-size: 15px;
+      transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+    }
+
+    .form-input::placeholder {
+      color: #b1a79e;
+    }
+
+    .form-input:focus {
+      border-color: #c9853e;
+      background: #ffffff;
+      box-shadow:
+        0 0 0 4px rgba(201, 133, 62, 0.13);
+    }
+
+    .password-toggle {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      padding: 7px 9px;
+      border: none;
+      border-radius: 9px;
+      background: transparent;
+      color: #8c7e71;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .password-toggle:hover {
+      background: #f3e9dd;
+      color: #a46328;
+    }
+
+    .login-message {
+      min-height: 22px;
+      margin-top: 2px;
+      margin-bottom: 8px;
+      color: #d84f4f;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .login-button {
+      width: 100%;
+      height: 54px;
+      border: none;
+      border-radius: 14px;
+      background:
+        linear-gradient(
+          135deg,
+          #cf8c45,
+          #a75e24
+        );
+      color: white;
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow:
+        0 14px 28px rgba(161, 90, 35, 0.25);
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        opacity 0.2s ease;
+    }
+
+    .login-button:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 18px 34px rgba(161, 90, 35, 0.32);
+    }
+
+    .login-button:active {
+      transform: translateY(0);
+    }
+
+    .login-button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .login-footer {
+      margin-top: 23px;
+      padding-top: 20px;
+      border-top: 1px solid #eee6de;
+      text-align: center;
+    }
+
+    .back-link {
+      color: #8a7d72;
+      font-size: 14px;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #a66129;
+    }
+
+    .system-note {
+      margin-top: 16px;
+      color: #aaa097;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 920px) {
+      .login-page {
+        grid-template-columns: 1fr;
+      }
+
+      .brand-section {
+        display: none;
+      }
+
+      .login-section {
+        min-height: 100vh;
+        padding: 28px 18px;
+      }
+
+      .mobile-brand {
+        display: block;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .login-card {
+        padding: 28px 22px;
+        border-radius: 22px;
+      }
+
+      .login-card h1 {
+        font-size: 29px;
+      }
+
+      .login-section {
+        padding: 24px 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="login-page">
+
+    <section class="brand-section">
+      <div class="brand-content">
+
+        <div class="brand-logo">
+          🥚
+        </div>
+
+        <div class="brand-name">
+          國宏蛋行
+        </div>
+
+        <h2 class="brand-title">
+          商品與庫存管理<br />
+          從這裡開始
+        </h2>
+
+        <p class="brand-description">
+          統一管理商品資料、售價、庫存與上架狀態，
+          讓日常營運資訊更清楚、更有效率。
+        </p>
+
+        <div class="brand-features">
+
+          <div class="feature-item">
+            <span class="feature-icon">📦</span>
+            <span>商品管理</span>
+          </div>
+
+          <div class="feature-item">
+            <span class="feature-icon">📊</span>
+            <span>庫存統計</span>
+          </div>
+
+          <div class="feature-item">
+            <span class="feature-icon">👥</span>
+            <span>權限管理</span>
+          </div>
+
+          <div class="feature-item">
+            <span class="feature-icon">🔒</span>
+            <span>安全登入</span>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section class="login-section">
+
+      <div class="login-container">
+
+        <div class="mobile-brand">
+
+          <div class="mobile-logo">
+            🥚
+          </div>
+
+          <div class="mobile-brand-title">
+            國宏蛋行
+          </div>
+
+          <div class="mobile-brand-subtitle">
+            後台管理系統
+          </div>
+
+        </div>
+
+        <section class="login-card">
+
+          <div class="login-badge">
+            🔐 ADMIN SYSTEM
+          </div>
+
+          <h1>
+            管理員登入
+          </h1>
+
+          <p class="login-description">
+            請輸入店員或管理員帳號，登入國宏蛋行後台。
+          </p>
+
+          <form
+            id="loginForm"
+            class="login-form"
+          >
+
+            <div class="form-group">
+
+              <label
+                for="username"
+                class="form-label"
+              >
+                管理員帳號
+              </label>
+
+              <div class="input-wrapper">
+
+                <span class="input-icon">
+                  👤
+                </span>
+
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  class="form-input"
+                  placeholder="請輸入帳號"
+                  autocomplete="username"
+                  required
+                />
+
+              </div>
+            </div>
+
+            <div class="form-group">
+
+              <label
+                for="password"
+                class="form-label"
+              >
+                密碼
+              </label>
+
+              <div class="input-wrapper">
+
+                <span class="input-icon">
+                  🔑
+                </span>
+
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  class="form-input"
+                  placeholder="請輸入密碼"
+                  autocomplete="current-password"
+                  required
+                />
+
+                <button
+                  type="button"
+                  id="togglePasswordButton"
+                  class="password-toggle"
+                >
+                  顯示
+                </button>
+
+              </div>
+            </div>
+
+            <div
+              id="loginMessage"
+              class="login-message"
+              aria-live="polite"
+            ></div>
+
+            <button
+              type="submit"
+              id="loginButton"
+              class="login-button"
+            >
+              登入後台
+            </button>
+
+          </form>
+
+          <div class="login-footer">
+
+            <a
+              href="/"
+              class="back-link"
+            >
+              ← 返回國宏蛋行首頁
+            </a>
+
+          </div>
+
+        </section>
+
+        <div class="system-note">
+          國宏蛋行內部管理系統
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/admin/js/login.js"></script>
+</body>
+</html>

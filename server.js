@@ -1,35 +1,64 @@
 require("dotenv").config();
 
+console.log("========== 新版 server.js ==========");
+
 const express = require("express");
 const path = require("path");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const pool = require("./db");
-
-const {
-  authenticateAdmin
-} = require("./middleware/auth");
+const { authenticateAdmin } = require("./middleware/auth");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ==============================
+// 檢查環境變數
+// ==============================
 
 if (!process.env.JWT_SECRET) {
   throw new Error("缺少 JWT_SECRET 環境變數");
 }
 
+// ==============================
+// Middleware
+// ==============================
+
 // 解析 JSON
 app.use(express.json());
 
-// 提供 public 靜態檔案
+// 解析表單資料
+app.use(
+  express.urlencoded({
+    extended: true
+  })
+);
+
+// 先提供 admin 靜態檔案
+// 例如：
+// /admin/login.html
+// /admin/css/admin.css
+// /admin/js/login.js
+app.use(
+  "/admin",
+  express.static(path.join(__dirname, "admin"))
+);
+
+// 再提供前台 public 靜態檔案
 app.use(express.static(path.join(__dirname, "public")));
 
-// 測試伺服器
+// ==============================
+// API：健康檢查
+// ==============================
+
 app.get("/api/health", async (req, res) => {
   try {
-    const result = await pool.query("SELECT NOW() AS now");
+    const result = await pool.query(
+      "SELECT NOW() AS now"
+    );
 
-    res.json({
+    return res.json({
       success: true,
       message: "伺服器與資料庫連線正常",
       databaseTime: result.rows[0].now
@@ -37,14 +66,17 @@ app.get("/api/health", async (req, res) => {
   } catch (error) {
     console.error("資料庫測試失敗：", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "資料庫連線失敗"
     });
   }
 });
 
-// 管理員登入
+// ==============================
+// API：管理員登入
+// ==============================
+
 app.post("/api/admin/login", async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -53,7 +85,7 @@ app.post("/api/admin/login", async (req, res) => {
       typeof username !== "string" ||
       typeof password !== "string" ||
       !username.trim() ||
-      !password
+      !password.trim()
     ) {
       return res.status(400).json({
         success: false,
@@ -140,7 +172,10 @@ app.post("/api/admin/login", async (req, res) => {
   }
 });
 
-// 測試 JWT 是否有效
+// ==============================
+// API：取得目前登入管理員
+// ==============================
+
 app.get(
   "/api/admin/me",
   authenticateAdmin,
@@ -183,7 +218,9 @@ app.get(
           id: admin.id,
           username: admin.username,
           displayName: admin.display_name,
-          role: admin.role
+          display_name: admin.display_name,
+          role: admin.role,
+          is_active: admin.is_active
         }
       });
     } catch (error) {
@@ -197,16 +234,126 @@ app.get(
   }
 );
 
+// ==============================
+// API：Dashboard 統計
+// ==============================
+
+app.get(
+  "/api/admin/dashboard",
+  authenticateAdmin,
+  async (req, res) => {
+    try {
+      const productStatsResult = await pool.query(`
+        SELECT
+          COUNT(*)::int AS total_products,
+
+          COUNT(*) FILTER (
+            WHERE is_available = true
+          )::int AS available_products,
+
+          COUNT(*) FILTER (
+            WHERE is_available = false
+          )::int AS unavailable_products,
+
+          COUNT(*) FILTER (
+            WHERE stock <= 10
+          )::int AS low_stock_products,
+
+          COUNT(*) FILTER (
+            WHERE stock = 0
+          )::int AS out_of_stock_products
+        FROM products
+      `);
+
+      const adminStatsResult = await pool.query(`
+        SELECT
+          COUNT(*)::int AS total_admins,
+
+          COUNT(*) FILTER (
+            WHERE is_active = true
+          )::int AS active_admins
+        FROM admins
+      `);
+
+      return res.json({
+        success: true,
+        data: {
+          ...productStatsResult.rows[0],
+          ...adminStatsResult.rows[0]
+        }
+      });
+    } catch (error) {
+      console.error(
+        "取得 Dashboard 統計失敗：",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        message: "取得 Dashboard 統計失敗"
+      });
+    }
+  }
+);
+
+// ==============================
+// API 找不到時回傳 JSON
+// 必須放在所有 /api 路由後面
+// ==============================
+
+app.use("/api", (req, res) => {
+  return res.status(404).json({
+    success: false,
+    message: "找不到此 API"
+  });
+});
+
+// ==============================
+// 一般頁面路由
+// ==============================
+
 // 首頁
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  return res.sendFile(
+    path.join(__dirname, "public", "index.html")
+  );
 });
 
+// 測試 admin 路由
+app.get("/admin-test", (req, res) => {
+  return res.send("admin 路由正常");
+});
+
+// 進入 /admin 時跳到登入頁
+app.get("/admin", (req, res) => {
+  return res.redirect("/admin/login.html");
+});
+
+// ==============================
 // Express 5 萬用路由
+// 一定要放在最後
+// ==============================
+
 app.get("/{*splat}", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  return res.sendFile(
+    path.join(__dirname, "public", "index.html")
+  );
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`國宏蛋行網站已啟動：http://localhost:${PORT}`);
+// ==============================
+// 啟動伺服器
+// ==============================
+
+const server = app.listen(
+  PORT,
+  "0.0.0.0",
+  () => {
+    console.log(
+      `國宏蛋行網站已啟動：http://localhost:${PORT}`
+    );
+  }
+);
+
+server.on("error", (error) => {
+  console.error("伺服器啟動失敗：", error);
 });
