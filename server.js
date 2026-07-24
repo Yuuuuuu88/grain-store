@@ -42,7 +42,7 @@ app.use(
 // /admin/js/login.js
 app.use(
   "/admin",
-  express.static(path.join(__dirname, "admin"))
+  express.static(path.join(__dirname, "manager"))
 );
 
 // 再提供前台 public 靜態檔案
@@ -903,13 +903,13 @@ app.post(
         username,
         password,
         display_name,
-        role = "admin"
+        role = "manager"
       } = req.body;
 
       username = String(username || "").trim();
       password = String(password || "");
       display_name = String(display_name || "").trim();
-      role = String(role || "admin").trim();
+      role = String(role || "manager").trim();
 
       if (!username || !password || !display_name) {
         return res.status(400).json({
@@ -1097,14 +1097,14 @@ app.put(
 
       // 防止把最後一位啟用中的超級管理員降級
       if (
-        targetAdmin.role === "super_admin" &&
-        role !== "super_admin" &&
+        targetAdmin.role === "owner" &&
+        role !== "owner" &&
         targetAdmin.is_active
       ) {
         const countResult = await client.query(`
           SELECT COUNT(*)::int AS count
           FROM admins
-          WHERE role = 'super_admin'
+          WHERE role = 'owner'
             AND is_active = true
         `);
 
@@ -1264,14 +1264,14 @@ app.patch(
       const targetAdmin = targetResult.rows[0];
 
       if (
-        targetAdmin.role === "super_admin" &&
+        targetAdmin.role === "owner" &&
         targetAdmin.is_active === true &&
         isActive === false
       ) {
         const countResult = await client.query(`
           SELECT COUNT(*)::int AS count
           FROM admins
-          WHERE role = 'super_admin'
+          WHERE role = 'owner'
             AND is_active = true
         `);
 
@@ -1366,7 +1366,7 @@ app.get("/admin", (req, res) => {
 
 app.get("/admin/admins", (req, res) => {
   return res.sendFile(
-    path.join(__dirname, "admin", "admins.html")
+    path.join(__dirname, "manager", "admins.html")
   );
 });
 
