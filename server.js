@@ -834,6 +834,43 @@ app.get("/api/products", async (req, res) => {
   }
 });
 
+// ==================== 管理員列表 ====================
+app.get("/api/admin/admins", authenticateAdmin, async (req, res) => {
+  try {
+    // 只有超級管理員可以查看
+    if (req.admin.role !== "super_admin") {
+      return res.status(403).json({
+        success: false,
+        message: "沒有權限"
+      });
+    }
+
+    const result = await pool.query(`
+      SELECT
+        id,
+        username,
+        display_name,
+        role,
+        is_active,
+        created_at
+      FROM admins
+      ORDER BY created_at ASC
+    `);
+
+    res.json({
+      success: true,
+      admins: result.rows
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "取得管理員失敗"
+    });
+  }
+});
+
 // ==============================
 // API 找不到時回傳 JSON
 // 必須放在所有 /api 路由後面
